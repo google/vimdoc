@@ -1,0 +1,3 @@
+*.pyc
+/build/
+/deb_dist/
