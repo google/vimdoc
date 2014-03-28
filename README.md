@@ -133,7 +133,7 @@ The global directives (@stylized, @tagline, @author, @order, and @library) are
 all detected from the 'main' plugin file. The main plugin file is the first
 file that exists in the following list:
 
--  &lt;plugin-name&gt;/plugin/&lt;plugin-name&lt;.vim
+-  &lt;plugin-name&gt;/plugin/&lt;plugin-name&gt;.vim
 -  &lt;plugin-name&gt;/instant/flags.vim
 -  A unique .vim file in &lt;plugin-name&gt;/ftplugin
 -  &lt;plugin-name&gt;/autoload/&lt;plugin-name&gt;.vim
