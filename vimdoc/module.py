@@ -238,7 +238,7 @@ def Modules(directory):
     Module objects as necessary.
   """
   directory = directory.rstrip(os.path.sep)
-  plugin_name = os.path.basename(directory)
+  plugin_name = os.path.basename(os.path.abspath(directory))
   docdir = os.path.join(directory, 'doc')
   if not os.path.isdir(docdir):
     os.mkdir(docdir)
