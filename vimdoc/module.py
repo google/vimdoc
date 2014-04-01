@@ -250,12 +250,10 @@ def Modules(directory):
           'Failed to read file {}. Error was: {}'.format(addon_info_path, e),
           error.InvalidAddonInfo)
   plugin_name = None
-  # Use plugin name from addon-info.json if available.
-  if addon_info is not None:
-    plugin_name = addon_info.get('name')
-  # Fall back to directory name.
-  if plugin_name is None:
-    plugin_name = os.path.basename(os.path.abspath(directory))
+  # Use plugin name from addon-info.json if available. Fall back to dir name.
+  addon_info = addon_info or {}
+  plugin_name = addon_info.get(
+      'name', os.path.basename(os.path.abspath(directory)))
   docdir = os.path.join(directory, 'doc')
   if not os.path.isdir(docdir):
     os.mkdir(docdir)
