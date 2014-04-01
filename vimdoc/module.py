@@ -238,7 +238,24 @@ def Modules(directory):
     Module objects as necessary.
   """
   directory = directory.rstrip(os.path.sep)
-  plugin_name = os.path.basename(os.path.abspath(directory))
+  addon_info = None
+  # Check for module metadata in addon-info.json (if it exists).
+  addon_info_path = os.path.join(directory, 'addon-info.json')
+  if os.path.isfile(addon_info_path):
+    try:
+      with open(addon_info_path, 'r') as addon_info_file:
+        addon_info = json.loads(addon_info_file.read())
+    except (IOError, ValueError) as e:
+      warnings.warn(
+          'Failed to read file {}. Error was: {}'.format(addon_info_path, e),
+          error.InvalidAddonInfo)
+  plugin_name = None
+  # Use plugin name from addon-info.json if available.
+  if addon_info is not None:
+    plugin_name = addon_info.get('name')
+  # Fall back to directory name.
+  if plugin_name is None:
+    plugin_name = os.path.basename(os.path.abspath(directory))
   docdir = os.path.join(directory, 'doc')
   if not os.path.isdir(docdir):
     os.mkdir(docdir)
@@ -309,18 +326,9 @@ def Modules(directory):
           namespace = None
         for block in blocks:
           module.Merge(block, namespace=namespace)
-  # Check for module metadata in addon-info.json (if it exists).
-  # Do this at the end to take precedence over vimdoc directives.
-  addon_info_path = os.path.join(directory, 'addon-info.json')
-  if os.path.isfile(addon_info_path):
-    try:
-      with open(addon_info_path, 'r') as addon_info_file:
-        addon_info = json.loads(addon_info_file.read())
-    except (IOError, ValueError) as e:
-      warnings.warn(
-          'Failed to read file {}. Error was: {}'.format(addon_info_path, e),
-          error.InvalidAddonInfo)
-    else:
+    # Set module metadata from addon-info.json.
+    # Do this at the end to take precedence over vimdoc directives.
+    if addon_info is not None:
       # Valid addon-info.json. Apply addon metadata.
       if 'author' in addon_info:
         module.author = addon_info['author']
