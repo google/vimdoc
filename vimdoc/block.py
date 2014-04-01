@@ -43,8 +43,6 @@ class Block(object):
 
   def AddLine(self, line):
     """Adds a line of text to the block. Paragraph type is auto-determined."""
-    # Always grab the required/optional args.
-    self._ParseArgs(line)
     # Code blocks are treated differently:
     # Newlines aren't joined and blanklines aren't special.
     # See :help help-writing for specification.
@@ -63,6 +61,8 @@ class Block(object):
         return
       self.paragraphs.AddLine(line)
       return
+    # Always grab the required/optional args.
+    self._ParseArgs(line)
     # Blank lines divide paragraphs.
     if not line.strip():
       self.paragraphs.SetType(paragraph.BlankLine)
