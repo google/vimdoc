@@ -49,9 +49,12 @@ def EnumerateStripNewlinesAndJoinContinuations(lines):
 
 
 def EnumerateParsedLines(lines):
-  # The intro chunk doesn't need the double-quote introduction.
-  vimdoc_mode = True
+  vimdoc_mode = False
   for i, line in EnumerateStripNewlinesAndJoinContinuations(lines):
+    # The intro chunk doesn't need the double-quote introduction (but leave
+    # explicit vimdoc leaders alone to be detected and stripped below).
+    if i == 0 and IsComment(line) and not regex.vimdoc_leader.match(line):
+      vimdoc_mode = True
     if not vimdoc_mode:
       if regex.vimdoc_leader.match(line):
         vimdoc_mode = True
