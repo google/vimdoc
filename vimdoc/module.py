@@ -41,25 +41,7 @@ class Module(object):
     self.library = None
 
     blocklist = list(blocks)
-    # The initial file had no blocks. We're done initializing.
-    if not blocklist:
-      return
 
-    # The initial block has no explicit type. It's the intro section.
-    if blocklist[0].locals.get('type') is True:
-      blocklist[0].SetType(vimdoc.SECTION)
-      blocklist[0].Local(name='Introduction', id='intro')
-    # The first block is allowed to contain metadata if it's a SECTION.
-    if blocklist[0].locals.get('type') == vimdoc.SECTION:
-      self.ConsumeMetadata(blocklist[0])
-
-    # The final block has no explicit type. It's the about section.
-    if blocklist[-1].locals.get('type') is True:
-      blocklist[-1].SetType(vimdoc.SECTION)
-      blocklist[-1].Local(name='About', id='about')
-    # The final block is allowed to contain metadata if it's SECTION/BACKMATTER.
-    if blocklist[-1].locals.get('type') in [vimdoc.SECTION, vimdoc.BACKMATTER]:
-      self.ConsumeMetadata(blocklist[-1])
     for block in blocklist:
       self.Merge(block, namespace=namespace)
 
@@ -80,6 +62,9 @@ class Module(object):
 
   def Merge(self, block, namespace=None):
     """Merges a block with the module."""
+    if block.locals.get('type') in [vimdoc.SECTION, vimdoc.BACKMATTER]:
+      self.ConsumeMetadata(block)
+
     # They would have been cleared by ConsumeMetadata if the block were allowed
     # to have globals.
     if block.globals:
