@@ -120,13 +120,6 @@ class BadStructure(Error):
   pass
 
 
-class UnknownPluginType(BadStructure):
-  def __init__(self):
-    super(UnknownPluginType, self).__init__(
-        "Vimdoc can't determine the plugin type. "
-        'Plugins must contain plugin, ftplugin, or autoload directories.')
-
-
 class NoSuchSection(BadStructure):
   def __init__(self, section):
     super(NoSuchSection, self).__init__(

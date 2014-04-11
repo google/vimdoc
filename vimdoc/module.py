@@ -10,10 +10,6 @@ from vimdoc import error
 from vimdoc import parser
 from vimdoc.block import Block
 
-MAIN = 0
-AUTOLOAD = 1
-GENERIC = 2
-
 # Plugin subdirectories that should be crawled by vimdoc.
 DOC_SUBDIRS = [
     'plugin',
@@ -29,90 +25,46 @@ DOC_SUBDIRS = [
 class Module(object):
   """Manages a set of source files that all output to the same help file."""
 
-  def __init__(self, name, blocks, namespace=None):
+  def __init__(self, name, plugin):
     self.name = name
+    self.plugin = plugin
     self.sections = OrderedDict()
     self.backmatters = {}
     self.collections = {}
     self.order = None
-    self.tagline = None
-    self.author = None
-    self.stylization = None
-    self.library = None
-
-    blocklist = list(blocks)
-
-    for block in blocklist:
-      self.Merge(block, namespace=namespace)
-
-  def ConsumeMetadata(self, block):
-    assert block.locals.get('type') == 'SECTION'
-    for control in ['order', 'author', 'stylization', 'library', 'tagline']:
-      if control in block.globals:
-        if getattr(self, control) is not None:
-          raise error.RedundantControl(control)
-        setattr(self, control, block.globals[control])
-    block.globals.clear()
-
-  def Inherit(self, module):
-    if self.author is None:
-      self.author = module.author
-    if self.library is None:
-      self.library = module.library
 
   def Merge(self, block, namespace=None):
     """Merges a block with the module."""
-    if block.locals.get('type') in [vimdoc.SECTION, vimdoc.BACKMATTER]:
-      self.ConsumeMetadata(block)
-
-    # They would have been cleared by ConsumeMetadata if the block were allowed
-    # to have globals.
-    if block.globals:
-      raise error.InvalidGlobals(block.globals)
-
     typ = block.locals.get('type')
+
     # This block doesn't want to be spoken to.
     if not typ:
       return
     # If the type still hasn't been set, it never will be.
     if typ is True:
       raise error.AmbiguousBlock
-    # The inclusion of function docs depends upon the module type.
-    if typ == vimdoc.FUNCTION:
-      # Exclude deprecated functions
-      if block.locals.get('deprecated'):
-        return
-      # If this is a library module, exclude private functions.
-      if self.library and block.locals.get('private'):
-        return
-      # If this is a non-library, exclude non-explicitly-public functions.
-      if not self.library and block.locals.get('private', True):
-        return
-      if 'exception' in block.locals:
-        typ = vimdoc.EXCEPTION
+
+    block.Local(namespace=namespace)
+    # Consume module-level metadata
+    if 'order' in block.globals:
+      if self.order is not None:
+        raise error.RedundantControl('order')
+      self.order = block.globals['order']
+      del block.globals['order']
+    self.plugin.Merge(block)
+
     # Sections and Backmatter are specially treated.
     if typ == vimdoc.SECTION:
       self.sections[block.locals.get('id')] = block
     elif typ == vimdoc.BACKMATTER:
       self.backmatters[block.locals.get('id')] = block
     else:
-      self.collections.setdefault(typ, []).append(block)
-    block.Local(namespace=namespace)
+      collection_type = self.plugin.GetCollectionType(block)
+      if collection_type is not None:
+        self.collections.setdefault(collection_type, []).append(block)
 
   def LookupTag(self, typ, name):
-    """Returns the tag name for the given type and name."""
-    if typ not in self.collections:
-      raise KeyError('Unrecognized lookup type: %s(%s)' % (typ, name))
-    collection = self.collections[typ]
-    # Support both @command(Name) and @command(:Name).
-    fullname = (
-        typ == vimdoc.COMMAND and name.lstrip(':') or name)
-    candidates = [x for x in collection if x.FullName() == fullname]
-    if not candidates:
-      raise KeyError('%s "%s" not found' % (typ, name))
-    if len(candidates) > 1:
-      raise KeyError('Found multiple %ss named %s' % (typ, name))
-    return candidates[0].TagName()
+    return self.plugin.LookupTag(typ, name)
 
   def Close(self):
     """Closes the module.
@@ -211,6 +163,74 @@ class Module(object):
         yield self.backmatters[ident]
 
 
+class VimPlugin(object):
+  """State for entire plugin (potentially multiple modules)."""
+
+  def __init__(self, name):
+    self.name = name
+    self.collections = {}
+    self.tagline = None
+    self.author = None
+    self.stylization = None
+    self.library = None
+
+  def ConsumeMetadata(self, block):
+    assert block.locals.get('type') in [vimdoc.SECTION, vimdoc.BACKMATTER]
+    for control in ['author', 'stylization', 'library', 'tagline']:
+      if control in block.globals:
+        if getattr(self, control) is not None:
+          raise error.RedundantControl(control)
+        setattr(self, control, block.globals[control])
+        del block.globals[control]
+
+    # Any remaining globals are not recognized.
+    if block.globals:
+      raise error.InvalidGlobals(block.globals)
+
+  def LookupTag(self, typ, name):
+    """Returns the tag name for the given type and name."""
+    if typ not in self.collections:
+      raise KeyError('Unrecognized lookup type: %s(%s)' % (typ, name))
+    collection = self.collections[typ]
+    # Support both @command(Name) and @command(:Name).
+    fullname = (
+        typ == vimdoc.COMMAND and name.lstrip(':') or name)
+    candidates = [x for x in collection if x.FullName() == fullname]
+    if not candidates:
+      raise KeyError('%s "%s" not found' % (typ, name))
+    if len(candidates) > 1:
+      raise KeyError('Found multiple %ss named %s' % (typ, name))
+    return candidates[0].TagName()
+
+  def GetCollectionType(self, block):
+    typ = block.locals.get('type')
+
+    # The inclusion of function docs depends upon the module type.
+    if typ == vimdoc.FUNCTION:
+      # Exclude deprecated functions
+      if block.locals.get('deprecated'):
+        return None
+      # If this is a library module, exclude private functions.
+      if self.library and block.locals.get('private'):
+        return None
+      # If this is a non-library, exclude non-explicitly-public functions.
+      if not self.library and block.locals.get('private', True):
+        return None
+      if 'exception' in block.locals:
+        return vimdoc.EXCEPTION
+
+    return typ
+
+  def Merge(self, block):
+    typ = block.locals.get('type')
+    if typ in [vimdoc.SECTION, vimdoc.BACKMATTER]:
+      self.ConsumeMetadata(block)
+    else:
+      collection_type = self.GetCollectionType(block)
+      if collection_type is not None:
+        self.collections.setdefault(collection_type, []).append(block)
+
+
 def Modules(directory):
   """Creates modules from a plugin directory.
 
@@ -239,44 +259,12 @@ def Modules(directory):
   addon_info = addon_info or {}
   plugin_name = addon_info.get(
       'name', os.path.basename(os.path.abspath(directory)))
-  docdir = os.path.join(directory, 'doc')
-  if not os.path.isdir(docdir):
-    os.mkdir(docdir)
-  plugindir = os.path.join(directory, 'plugin')
-  ftplugindir = os.path.join(directory, 'ftplugin')
+  plugin = VimPlugin(plugin_name)
+
+  # Crawl plugin dir and collect parsed blocks for each file path.
+  paths_and_blocks = []
+  standalone_paths = []
   autoloaddir = os.path.join(directory, 'autoload')
-  main_namespace = None
-  old_standard_file = os.path.join(directory, 'plugin', plugin_name + '.vim')
-  flags_file = os.path.join(directory, 'instant', 'flags.vim')
-  if os.path.isfile(old_standard_file):
-    mainfile = old_standard_file
-  elif os.path.isfile(flags_file):
-    mainfile = flags_file
-  elif os.path.exists(os.path.join(directory, 'plugin')):
-    mainfile = GuessMainFileIgnoringOthersPotentiallyContainingDirectives(
-        plugindir)
-  elif os.path.exists(os.path.join(directory, 'ftplugin')):
-    mainfile = GuessMainFileIgnoringOthersPotentiallyContainingDirectives(
-        ftplugindir)
-  elif os.path.exists(os.path.join(directory, 'autoload')):
-    main_autoload = os.path.join(directory, 'autoload', plugin_name + '.vim')
-    if os.path.exists(main_autoload):
-      mainfile = main_autoload
-      filepath = os.path.relpath(main_autoload, autoloaddir)
-      main_namespace = GetAutoloadNamespace(filepath)
-    else:
-      mainfile = None
-  else:
-    raise error.UnknownPluginType
-  # The main file. The only one allowed to have sections.
-  if mainfile:
-    with open(mainfile) as filehandle:
-      blocks = parser.ParseBlocks(filehandle, mainfile)
-      module = Module(plugin_name, blocks, namespace=main_namespace)
-  else:
-    module = Module(plugin_name, [])
-  standalones = []
-  # Extension files. May have commands/settings/flags/functions.
   for (root, dirs, files) in os.walk(directory):
     # Prune non-standard top-level dirs like 'test'.
     if root == directory:
@@ -285,76 +273,76 @@ def Modules(directory):
       dirs[:] = [x for x in dirs if x in DOC_SUBDIRS]
     for f in files:
       filename = os.path.join(root, f)
-      if filename.endswith('.vim') and filename != mainfile:
+      if os.path.splitext(filename)[1] == '.vim':
         with open(filename) as filehandle:
           blocks = list(parser.ParseBlocks(filehandle, filename))
+        relative_path = os.path.relpath(filename, directory)
+        paths_and_blocks.append((relative_path, blocks))
         if filename.startswith(autoloaddir):
-          filepath = os.path.relpath(filename, autoloaddir)
-          # We have to watch out. The file might be standalone. If it is,
-          # the accompanying directory belongs to the standalone.
-          # If autoload/foo.vim is standalone then so is autoload/foo/*.
           if blocks and blocks[0].globals.get('standalone'):
-            standalone_name = os.path.splitext(filepath)[0].replace('/', '#')
-            standalones.append((standalone_name, blocks))
-            subdir = os.path.splitext(filename)[0]
-            try:
-              # Remove the accompanying directory.
-              del dirs[dirs.index(subdir)]
-            except ValueError:
-              # There was no accompanying directory.
-              pass
-            continue
-          namespace = GetAutoloadNamespace(filepath)
-        else:
-          namespace = None
-        for block in blocks:
-          module.Merge(block, namespace=namespace)
-    # Set module metadata from addon-info.json.
-    # Do this at the end to take precedence over vimdoc directives.
-    if addon_info is not None:
-      # Valid addon-info.json. Apply addon metadata.
-      if 'author' in addon_info:
-        module.author = addon_info['author']
-      if 'description' in addon_info:
-        module.tagline = addon_info['description']
+            standalone_paths.append(relative_path)
+            del blocks[0].globals['standalone']
 
-  module.Close()
-  yield module
-  # Handle the standalone autoloadable files.
-  for (name, blocks) in standalones:
-    namespace = name + '#'
-    submodule = Module(name, blocks, namespace=namespace)
-    submodule.Inherit(module)
-    for (root, dirs, files) in os.walk(os.path.join(autoloaddir, name)):
-      namespace = root.replace('/', '#') + '#'
-      for f in files:
-        filename = os.path.join(root, f)
-        if filename.endswith('.vim'):
-          with open(filename) as filehandle:
-            for block in parser.ParseBlocks(filehandle, filename):
-              submodule.Merge(block, namespace=namespace)
-    submodule.Close()
-    yield submodule
+  docdir = os.path.join(directory, 'doc')
+  if not os.path.isdir(docdir):
+    os.mkdir(docdir)
+
+  modules = []
+
+  main_module = Module(plugin_name, plugin)
+  for (path, blocks) in paths_and_blocks:
+    # Skip standalone paths.
+    if GetMatchingStandalonePath(path, standalone_paths) is not None:
+      continue
+    namespace = None
+    if path.startswith('autoload' + os.path.sep):
+      namespace = GetAutoloadNamespace(os.path.relpath(path, 'autoload'))
+    for block in blocks:
+      main_module.Merge(block, namespace=namespace)
+  modules.append(main_module)
+
+  # Process standalone modules.
+  standalone_modules = {}
+  for (path, blocks) in paths_and_blocks:
+    standalone_path = GetMatchingStandalonePath(path, standalone_paths)
+    # Skip all but standalone paths.
+    if standalone_path is None:
+      continue
+    assert path.startswith('autoload' + os.path.sep)
+    namespace = GetAutoloadNamespace(os.path.relpath(path, 'autoload'))
+    standalone_module = standalone_modules.get(standalone_path)
+    # Initialize module if this is the first file processed from it.
+    if standalone_module is None:
+      standalone_module = Module(namespace.rstrip('#'), plugin)
+      standalone_modules[standalone_path] = standalone_module
+      modules.append(standalone_module)
+    for block in blocks:
+      standalone_module.Merge(block, namespace=namespace)
+
+  # Set module metadata from addon-info.json.
+  # Do this at the end to take precedence over vimdoc directives.
+  if addon_info is not None:
+    # Valid addon-info.json. Apply addon metadata.
+    if 'author' in addon_info:
+      plugin.author = addon_info['author']
+    if 'description' in addon_info:
+      plugin.tagline = addon_info['description']
+
+  for module in modules:
+    module.Close()
+    yield module
 
 
 def GetAutoloadNamespace(filepath):
   return (os.path.splitext(filepath)[0]).replace('/', '#') + '#'
 
 
-def GuessMainFileIgnoringOthersPotentiallyContainingDirectives(directory):
-  """Pick a file to check for plugin-level directives.
-
-  This is a short-term hack. Eventually, vimdoc will process plugins more
-  holistically and detect plugin directives in other files.
-
-  Args:
-    directory: The plugin directory.
-  Returns:
-    Path to "main" file, or None if no single "main" file is identified.
-  """
-  files = [f for f in os.listdir(directory)
-           if os.path.isfile(os.path.join(directory, f))
-           and f.endswith('.vim')]
-  if len(files) == 1:
-    return os.path.join(directory, files[0])
+def GetMatchingStandalonePath(path, standalones):
+  for standalone in standalones:
+    # Check for filename match.
+    if path == standalone:
+      return standalone
+    # Strip off '.vim' and check for directory match.
+    if path.startswith(os.path.splitext(standalone)[0] + os.path.sep):
+      return standalone
   return None

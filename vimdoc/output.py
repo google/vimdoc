@@ -37,16 +37,16 @@ class Helpfile(object):
     # The first line should conform to ':help write-local-help', with a tag for
     # the filename followed by a tab and the tagline (if present).
     line = self.Tag(self.Filename())
-    if self.module.tagline:
-      line = '{}\t{}'.format(line, self.module.tagline)
+    if self.module.plugin.tagline:
+      line = '{}\t{}'.format(line, self.module.plugin.tagline)
     # Use Print directly vs. WriteLine so tab isn't expanded by TextWrapper.
     self.Print(line)
     # Next write a line with the author (if present) and tags.
     tag = self.Tag(self.module.name)
-    if self.module.stylization:
-      tag = '{} {}'.format(self.Tag(self.module.stylization), tag)
-    if self.module.author:
-      self.WriteLine(self.module.author, right=tag)
+    if self.module.plugin.stylization:
+      tag = '{} {}'.format(self.Tag(self.module.plugin.stylization), tag)
+    if self.module.plugin.author:
+      self.WriteLine(self.module.plugin.author, right=tag)
     else:
       self.WriteLine(right=tag)
     self.WriteLine()
@@ -258,15 +258,15 @@ class Helpfile(object):
           vimdoc.DICTIONARY, element), '.'))
     elif inline == 'plugin':
       if element == 'author':
-        return self.module.author
+        return self.module.plugin.author
       elif element == 'tagline':
-        return self.module.tagline
+        return self.module.plugin.tagline
       elif element == 'stylized':
-        return self.module.stylization
+        return self.module.plugin.stylization
       elif element == 'name':
         return self.module.name
       elif element is None:
-        return self.module.stylization
+        return self.module.plugin.stylization
       else:
         raise error.UnrecognizedInlineDirective(
             '{} attribute in {}'.format(element, inline))
