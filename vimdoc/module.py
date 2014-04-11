@@ -50,7 +50,6 @@ class Module(object):
       if self.order is not None:
         raise error.RedundantControl('order')
       self.order = block.globals['order']
-      del block.globals['order']
     self.plugin.Merge(block)
 
     # Sections and Backmatter are specially treated.
@@ -181,11 +180,6 @@ class VimPlugin(object):
         if getattr(self, control) is not None:
           raise error.RedundantControl(control)
         setattr(self, control, block.globals[control])
-        del block.globals[control]
-
-    # Any remaining globals are not recognized.
-    if block.globals:
-      raise error.InvalidGlobals(block.globals)
 
   def LookupTag(self, typ, name):
     """Returns the tag name for the given type and name."""
@@ -281,7 +275,6 @@ def Modules(directory):
         if filename.startswith(autoloaddir):
           if blocks and blocks[0].globals.get('standalone'):
             standalone_paths.append(relative_path)
-            del blocks[0].globals['standalone']
 
   docdir = os.path.join(directory, 'doc')
   if not os.path.isdir(docdir):

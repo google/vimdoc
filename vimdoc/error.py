@@ -88,16 +88,6 @@ class InconsistentControl(ParseError):
         *args, **kwargs)
 
 
-class InvalidGlobals(ParseError):
-  def __init__(self, controls, *args, **kwargs):
-    ctrlstring = ', '.join(controls)
-    super(InvalidGlobals, self).__init__(
-        'Plugin settings may only appear in the Introduction or '
-        'About sections of the main file. '
-        'Offending controls: {}'.format(ctrlstring),
-        *args, **kwargs)
-
-
 class MultipleHeaders(ParseError):
   def __init__(self, *args, **kwargs):
     super(MultipleHeaders, self).__init__(
