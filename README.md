@@ -130,14 +130,7 @@ Available block directives include:
   command may throw.
 
 The global directives (@stylized, @tagline, @author, @order, and @library) are
-all detected from the 'main' plugin file. The main plugin file is the first
-file that exists in the following list:
-
--  &lt;plugin-name&gt;/plugin/&lt;plugin-name&gt;.vim
--  &lt;plugin-name&gt;/instant/flags.vim
--  A unique .vim file in &lt;plugin-name&gt;/ftplugin
--  &lt;plugin-name&gt;/autoload/&lt;plugin-name&gt;.vim
--  A unique .vim file in &lt;plugin-name&gt;/autoload
+all detected from inside a @section block (usually the Introduction section).
 
 ### Inline Directives
 
@@ -206,8 +199,7 @@ And so on for each section.
 
 #### Introduction
 
-The introductory comment block at the top of the main plugin file is used to
-populate this section.
+The introductory comment block is used to populate this section.
 
 #### Configuration
 
