@@ -183,18 +183,23 @@ class VimPlugin(object):
 
   def LookupTag(self, typ, name):
     """Returns the tag name for the given type and name."""
-    if typ not in self.collections:
-      raise KeyError('Unrecognized lookup type: %s(%s)' % (typ, name))
-    collection = self.collections[typ]
     # Support both @command(Name) and @command(:Name).
     fullname = (
         typ == vimdoc.COMMAND and name.lstrip(':') or name)
-    candidates = [x for x in collection if x.FullName() == fullname]
-    if not candidates:
-      raise KeyError('%s "%s" not found' % (typ, name))
-    if len(candidates) > 1:
-      raise KeyError('Found multiple %ss named %s' % (typ, name))
-    return candidates[0].TagName()
+    block = None
+    if typ in self.collections:
+      collection = self.collections[typ]
+      candidates = [x for x in collection if x.FullName() == fullname]
+      if len(candidates) > 1:
+        raise KeyError('Found multiple %ss named %s' % (typ, name))
+      if candidates:
+        block = candidates[0]
+    if block is None:
+      # Create a dummy block for to get default tag.
+      block = Block()
+      block.SetType(typ)
+      block.Local(name=fullname)
+    return block.TagName()
 
   def GetCollectionType(self, block):
     typ = block.locals.get('type')

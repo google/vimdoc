@@ -22,6 +22,7 @@ class Block(object):
     # dict (name)
     # private (boolean, in function)
     # name (of section)
+    # type (constant, e.g. vimdoc.FUNCTION)
     # id (of section, in section or backmatter)
     # namespace (of function)
     # attribute (of function in dict)
