@@ -229,11 +229,11 @@ class Helpfile(object):
 
   def Expand(self, text, namespace):
     def Expander(match):
-      try:
-        return self.ExpandInline(*match.groups(), namespace=namespace)
-      except error.UnrecognizedInlineDirective:
+      expanded = self.ExpandInline(*match.groups(), namespace=namespace)
+      if expanded is None:
         # Leave unrecognized directives unexpanded. Might be false positives.
         return match.group(0)
+      return expanded
     return regex.inline_directive.sub(Expander, text)
 
   def ExpandInline(self, inline, element, namespace):
@@ -268,4 +268,4 @@ class Helpfile(object):
       else:
         raise error.UnrecognizedInlineDirective(
             '{} attribute in {}'.format(element, inline))
-    raise error.UnrecognizedInlineDirective(inline)
+    return None
