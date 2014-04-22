@@ -195,7 +195,7 @@ class VimPlugin(object):
       if candidates:
         block = candidates[0]
     if block is None:
-      # Create a dummy block for to get default tag.
+      # Create a dummy block to get default tag.
       block = Block()
       block.SetType(typ)
       block.Local(name=fullname)
