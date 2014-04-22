@@ -259,8 +259,6 @@ class Helpfile(object):
     elif inline == 'plugin':
       if element == 'author':
         return self.module.plugin.author
-      elif element == 'tagline':
-        return self.module.plugin.tagline
       elif element == 'stylized':
         return self.module.plugin.stylization
       elif element == 'name':
