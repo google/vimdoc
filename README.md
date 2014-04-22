@@ -91,6 +91,10 @@ These defaults are usually correct, but can be overridden.
 
 Vimdoc has a number of builtin directives, which are marked by @ signs.
 
+It also detects your plugin's addon-info.json file if present (see the
+[documentation](http://vim-wiki.mawercer.de/wiki/topic/addon-info.json.html) and
+relevant [VAM help](https://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager-additional-documentation.txt).
+
 ### Block Directives
 
 Block directives take up an entire line in the comment block. They look like
@@ -105,10 +109,6 @@ Available block directives include:
 
 - `@stylized name` allows you to define the stylized version of a plugin name
   (for example, myplugin could be stylized as "My Plugin").
-- `@tagline ...` allows you to give a tagline to your plugin, which will show up
-  at the top of the help file.
-- `@author name` allows you to define an author for the plugin, which will show
-  up in the help file.
 - `@library` marks your plugin as a library plugin. This makes functions public
   by default.
 - `@public` marks a function public. In most plugins, functions are private by
@@ -129,8 +129,8 @@ Available block directives include:
 - `@throws exception` describes the type of exceptions that a function or
   command may throw.
 
-The global directives (@stylized, @tagline, @author, @order, and @library) are
-all detected from inside a @section block (usually the Introduction section).
+The global directives (@stylized, @order, and @library) are all detected from
+inside a @section block (usually the Introduction section).
 
 ### Inline Directives
 
@@ -144,8 +144,24 @@ enclosed in parenthesis.
 - `@section(name)` generates a link to a section defined in the plugin.
 - `@dict(name)` generates a link to a dictionary defined in the plugin.
 - `@plugin(attr)` Outputs some plugin data, such as the name or author. `attr`
-  must be one of `stylized`, `name`, `tagline`, or `author`. If the attr (and
-  parenthesis) are left off, `stylized` is used.
+  must be one of `stylized`, `name`, or `author`. If the attr (and parenthesis)
+  are left off, `stylized` is used.
+
+### Other Metadata
+
+Some metadata for your plugin is not configured via vimdoc directives, but comes
+from other sources.
+
+By default, the `name` for the plugin is the name of its top-level directory. If
+an
+[addon-info.json](http://vim-wiki.mawercer.de/wiki/topic/addon-info.json.html)
+file is present and contains an explicit "name" field, vimdoc will use that
+plugin name instead. This is important if the plugin lives in a directory with a
+"vim" prefix or suffix, such as "vim-dispatch". This plugin name will appear in
+the helpfile header and determine the name of the helpfile itself.
+
+Vimdoc will also take the `author` and `description` values from the "author"
+and "description" fields in addon-info.json.
 
 
 Syntax
