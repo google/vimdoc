@@ -175,7 +175,16 @@ class VimPlugin(object):
 
   def ConsumeMetadata(self, block):
     assert block.locals.get('type') in [vimdoc.SECTION, vimdoc.BACKMATTER]
-    for control in ['author', 'stylization', 'library', 'tagline']:
+    # Error out for deprecated controls.
+    if 'author' in block.globals:
+      raise error.InvalidBlock(
+          'Invalid directive @author.'
+          ' Specify author field in addon-info.json instead.')
+    if 'tagline' in block.globals:
+      raise error.InvalidBlock(
+          'Invalid directive @tagline.'
+          ' Specify description field in addon-info.json instead.')
+    for control in ['stylization', 'library']:
       if control in block.globals:
         if getattr(self, control) is not None:
           raise error.RedundantControl(control)
@@ -260,6 +269,14 @@ def Modules(directory):
       'name', os.path.basename(os.path.abspath(directory)))
   plugin = VimPlugin(plugin_name)
 
+  # Set module metadata from addon-info.json.
+  if addon_info is not None:
+    # Valid addon-info.json. Apply addon metadata.
+    if 'author' in addon_info:
+      plugin.author = addon_info['author']
+    if 'description' in addon_info:
+      plugin.tagline = addon_info['description']
+
   # Crawl plugin dir and collect parsed blocks for each file path.
   paths_and_blocks = []
   standalone_paths = []
@@ -316,15 +333,6 @@ def Modules(directory):
       modules.append(standalone_module)
     for block in blocks:
       standalone_module.Merge(block, namespace=namespace)
-
-  # Set module metadata from addon-info.json.
-  # Do this at the end to take precedence over vimdoc directives.
-  if addon_info is not None:
-    # Valid addon-info.json. Apply addon metadata.
-    if 'author' in addon_info:
-      plugin.author = addon_info['author']
-    if 'description' in addon_info:
-      plugin.tagline = addon_info['description']
 
   for module in modules:
     module.Close()
