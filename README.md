@@ -93,7 +93,7 @@ Vimdoc has a number of builtin directives, which are marked by @ signs.
 
 It also detects your plugin's addon-info.json file if present (see the
 [documentation](http://vim-wiki.mawercer.de/wiki/topic/addon-info.json.html) and
-relevant [VAM help](https://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager-additional-documentation.txt).
+relevant [VAM help](https://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager-additional-documentation.txt)).
 
 ### Block Directives
 
