@@ -94,7 +94,7 @@ def ParseCodeLine(line):
   smatch = regex.setting_line.match(line)
   if smatch:
     name, = smatch.groups()
-    return codeline.Setting(name)
+    return codeline.Setting('g:' + name)
   flagmatch = regex.flag_line.match(line)
   if flagmatch:
     a, b = flagmatch.groups()
