@@ -8,6 +8,7 @@ import warnings
 import vimdoc
 from vimdoc import error
 from vimdoc import parser
+from vimdoc import regex
 from vimdoc.block import Block
 
 # Plugin subdirectories that should be crawled by vimdoc.
@@ -193,8 +194,13 @@ class VimPlugin(object):
   def LookupTag(self, typ, name):
     """Returns the tag name for the given type and name."""
     # Support both @command(Name) and @command(:Name).
-    fullname = (
-        typ == vimdoc.COMMAND and name.lstrip(':') or name)
+    if typ == vimdoc.COMMAND:
+      fullname = name.lstrip(':')
+    elif typ == vimdoc.SETTING:
+      scope_match = regex.setting_scope.match(name)
+      fullname = scope_match and name or 'g:' + name
+    else:
+      fullname = name
     block = None
     if typ in self.collections:
       collection = self.collections[typ]

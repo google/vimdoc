@@ -234,8 +234,6 @@ class Block(object):
       if 'exception' in self.locals:
         return 'ERROR({})'.format(self.locals['exception'] or self.LocalName())
       return self.locals.get('namespace', '') + self.LocalName()
-    if typ == vimdoc.SETTING:
-      return 'g:{}'.format(self.LocalName())
     return self.LocalName()
 
   def TagName(self):

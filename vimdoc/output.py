@@ -251,8 +251,7 @@ class Helpfile(object):
       return self.Link(
           self.Slug(self.module.LookupTag(vimdoc.FLAG, element), ':'))
     elif inline == 'setting':
-      setting = element if element.startswith('g:') else 'g:' + element
-      return self.Link('g:' + self.module.LookupTag(vimdoc.SETTING, setting))
+      return self.Link(self.module.LookupTag(vimdoc.SETTING, element))
     elif inline == 'dict':
       return self.Link(self.Slug(self.module.LookupTag(
           vimdoc.DICTIONARY, element), '.'))

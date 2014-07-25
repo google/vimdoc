@@ -313,6 +313,7 @@ setting_line = re.compile(r"""
   # May include [] (indexing) and {} (interpolation).
   ([a-zA-Z_][a-zA-Z0-9_{}\[\]]*)
 """, re.VERBOSE)
+setting_scope = re.compile(r'[a-z]:')
 flag_line = re.compile(r"""
   # Definition start.
   ^\s*call?\s*

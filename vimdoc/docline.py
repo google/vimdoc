@@ -193,6 +193,21 @@ class Section(BlockDirective):
     block.Local(name=self.name, id=self.id)
 
 
+class Setting(BlockDirective):
+  REGEX = regex.one_arg
+
+  def Assign(self, name):
+    scope_match = regex.setting_scope.match(name)
+    # Assume global scope if no explicit scope given.
+    if scope_match is None:
+      name = 'g:' + name
+    self.name = name
+
+  def Update(self, block):
+    block.SetType(vimdoc.SETTING)
+    block.Local(name=self.name)
+
+
 class Standalone(BlockDirective):
   def Update(self, block):
     block.Global(standalone=True)
@@ -369,6 +384,7 @@ BLOCK_DIRECTIVES = {
     'private': Private,
     'public': Public,
     'section': Section,
+    'setting': Setting,
     'standalone': Standalone,
     'stylized': Stylized,
     'subsection': SubSection,
