@@ -125,6 +125,8 @@ Available block directives include:
   does not offer enough control.
 - `@command ...` allows you to alter the command tag directly, for when @usage
   does not offer enough control.
+- `@setting name` declares a setting (global or per-buffer configuration
+  variable).
 - `@default arg=value` describes the default value of an optional arg.
 - `@throws exception` describes the type of exceptions that a function or
   command may throw.
@@ -221,6 +223,31 @@ The introductory comment block is used to populate this section.
 
 This section contains descriptions of all the flags and settings that were
 annotated by vimdoc comment blocks.
+
+Any global `let` command with a doc comment will automatically be detected as a
+setting:
+
+    ""
+    " Enable a thing.
+    let g:myplugin_enable_thing = 1
+
+You can use the `@setting` block directive to declare settings vimdoc doesn't
+recognize:
+
+    ""
+    " @setting g:myplugin_secret_number
+    " A secret number.
+    echo 'The number is' get(g:, 'myplugin_secret_number', b:changedtick)
+
+    ""
+    " @setting b:myplugin_enable_thing
+    " Enable a thing in the current buffer.
+
+Maktaba flags with doc comments are also automatically recognized:
+
+    ""
+    " Supported things.
+    call s:plugin.Flag('things', ['a', 'b'])
 
 #### Commands
 
