@@ -85,6 +85,9 @@ class All(BlockDirective):
       blocks[i].SetType(True)
     return ()
 
+  def Update(self, block):
+    pass
+
 
 class Author(BlockDirective):
   REGEX = regex.any_args
