@@ -114,7 +114,8 @@ Available block directives include:
 - `@public` marks a function public. In most plugins, functions are private by
   default, though this default may be overridden on a per-plugin basis.
 - `@private` marks a function private.
-- `@section name [id]` allows you to write a new section for the helpfile.
+- `@section name[, id]` allows you to write a new section for the helpfile. The
+  id will be a lowercased version of name if omitted.
 - `@order ...` allows you to define the order of the sections.
 - `@dict name` (above blank lines) allows you to define a new dictionary.
 - `@dict dict.fn` (above a function) allows you to add a function to
@@ -143,7 +144,7 @@ enclosed in parenthesis.
 - `@command(name)` generates a link to a command defined in the plugin.
 - `@flag(name)` generates a link to a flag defined in the plugin.
 - `@setting(name)` generates a link to a setting defined in the plugin.
-- `@section(name)` generates a link to a section defined in the plugin.
+- `@section(id)` generates a link to a section defined in the plugin.
 - `@dict(name)` generates a link to a dictionary defined in the plugin.
 - `@plugin(attr)` Outputs some plugin data, such as the name or author. `attr`
   must be one of `stylized`, `name`, or `author`. If the attr (and parenthesis)
