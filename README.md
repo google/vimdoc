@@ -121,6 +121,8 @@ Available block directives include:
   a dictionary.
 - `@usage ...` allows you to rename and reorder the arguments of a function or
   command.
+- `@all` denotes that the remainder of the block will be included in all usages
+  (in the case of multiple overloaded usages).
 - `@function ...` allows you to alter the function tag directly, for when @usage
   does not offer enough control.
 - `@command ...` allows you to alter the command tag directly, for when @usage
@@ -320,13 +322,13 @@ more than one usage directive. Example:
     " Add {item} to {list} at {index}.
     " @usage {dict} {key} {value}
     " Set {dict} {key} to {value}.
-    " @usage
+    " @all
     " WARNING: Will launch the nuclear missiles.
 
 This will generate two docs for the command: one for list, one for dicts. An
-empty @usage directive denotes that the remainder of the block will be included
-in all usages. In the above example, the warning will be included in both the
-list and the dict version of the command docs.
+@all directive denotes that the remainder of the block will be included in all
+usages. In the above example, the warning will be included in both the list and
+the dict version of the command docs.
 
 #### Dictionaries
 
