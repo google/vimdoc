@@ -74,10 +74,8 @@ class All(BlockDirective):
 
   def Affect(self, blocks, selection):
     selection[:] = range(len(blocks))
-    for i in selection:
-      if i >= len(blocks):
-        raise error.InvalidBlockNumber(i)
-      blocks[i].SetType(True)
+    for block in blocks:
+      block.SetType(True)
     return ()
 
   def Update(self, block):
