@@ -67,23 +67,19 @@ class BlockDirective(DocLine):
 
 
 class All(BlockDirective):
-  REGEX = regex.numbers_args
+  REGEX = regex.no_args
 
-  def Assign(self, numbers):
-    # @all blocks are one-indexed.
-    numbers = numbers or ''
-    self.blocks = [int(i) - 1 for i in regex.number_arg.findall(numbers)]
+  def Assign(self):
+    pass
 
   def Affect(self, blocks, selection):
-    if not self.blocks:
-      selection[:] = range(len(blocks))
-    else:
-      selection[:] = self.blocks
-    for i in selection:
-      if i >= len(blocks):
-        raise error.InvalidBlockNumber(i)
-      blocks[i].SetType(True)
+    selection[:] = range(len(blocks))
+    for block in blocks:
+      block.SetType(True)
     return ()
+
+  def Update(self, block):
+    pass
 
 
 class Author(BlockDirective):
