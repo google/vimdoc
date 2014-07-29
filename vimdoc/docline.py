@@ -182,6 +182,9 @@ class Section(BlockDirective):
 
   def Assign(self, name, ident):
     self.name = name.replace('\\,', ',').replace('\\\\', '\\')
+    if ident is None:
+      # If omitted, it's the name in lowercase, with spaces converted to dashes.
+      ident = self.name.lower().replace(' ', '-')
     self.id = ident
 
   def Update(self, block):
