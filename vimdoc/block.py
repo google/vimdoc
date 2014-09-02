@@ -86,8 +86,9 @@ class Block(object):
       self.paragraphs.Close()
     # Everything else is text.
     self.paragraphs.SetType(paragraph.TextParagraph)
-    # Lines ending in '>' enter code blocks.
-    if line.endswith('>'):
+    # Lines ending in '>' enter code blocks. Must have a space before if it if
+    # not on a line by itself.
+    if line == '>' or line.endswith(' >'):
       line = line[:-1].rstrip()
       if line:
         self.paragraphs.AddLine(line)
