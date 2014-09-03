@@ -310,7 +310,11 @@ class Header(BlockDirective):
     extra_opts = sep.join('[%s]' % o
                           for o in block.OptionalArgs()
                           if o not in self.opts)
-    return self.FillOut(block.FullName(), sep, extra_reqs, extra_opts)
+    usage = self.FillOut(block.FullName(), sep, extra_reqs, extra_opts)
+    # Command usage should have a ':' prefix before the name.
+    if block.locals.get('type') == vimdoc.COMMAND and not usage.startswith(':'):
+      usage = ':' + usage
+    return usage
 
   def FillOut(self, name, sep, extra_reqs, extra_opts):
     """Expands the usage line with the given arguments."""
