@@ -170,7 +170,9 @@ class Helpfile(object):
         width=self.WIDTH,
         initial_indent=(indent * self.TAB),
         subsequent_indent=((indent + 2) * self.TAB))
-    for line in wrapper.wrap(self.Expand(text, namespace)):
+    # wrap returns empty list for ''. See http://bugs.python.org/issue15510.
+    lines = wrapper.wrap(self.Expand(text, namespace)) or ['']
+    for line in lines:
       self.Print(line)
 
   def Print(self, line, end='\n'):
@@ -198,6 +200,7 @@ class Helpfile(object):
         subsequent_indent=subsequent_indent,
         break_on_hyphens=False)
     lines = wrapper.wrap(text)
+    # wrap returns empty list for ''. See http://bugs.python.org/issue15510.
     lines = lines or ['']
     lastlen = len(lines[-1])
     rightlen = len(right)
