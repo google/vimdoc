@@ -98,13 +98,6 @@ class Helpfile(object):
 
   def WriteLargeBlock(self, block):
     """Writes a large (function, command, etc.) type block."""
-    if not block.paragraphs:
-      warnings.warn(
-          'Undocumented {} {}'.format(
-              block.locals.get('type').lower(),
-              block.FullName()),
-          error.DocumentationWarning)
-      return
     assert 'usage' in block.locals
     self.WriteLine(
         # The leader='' makes it indent once on subsequent lines.
