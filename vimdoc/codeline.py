@@ -141,6 +141,7 @@ class Flag(Definition):
       # Append to last block, creating one if there isn't one yet.
       if not blocks:
         blocks.append(vimdoc.block.Block())
-      # Use unbulleted list to make sure it's on its own line.
-      blocks[-1].AddLine(' - Default: ' + self._default)
+      # Use unbulleted list to make sure it's on its own line. Use backtick to
+      # avoid helpfile syntax highlighting.
+      blocks[-1].AddLine(' - Default: {} `'.format(self._default))
     return super(Flag, self).Affect(blocks, selection)
