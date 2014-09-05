@@ -1,6 +1,5 @@
 """Vimdoc plugin management."""
 from collections import OrderedDict
-import itertools
 import json
 import os
 import warnings
@@ -117,9 +116,10 @@ class Module(object):
     for backmatter in self.backmatters:
       if backmatter not in self.sections:
         raise error.NoSuchSection(backmatter)
-    known = set(itertools.chain(self.sections, self.backmatters))
-    if known.difference(self.order):
-      raise error.NeglectedSections(known)
+    known = set(self.sections) | set(self.backmatters)
+    neglected = sorted(known.difference(self.order))
+    if neglected:
+      raise error.NeglectedSections(neglected, self.order)
     # Sections are now in order.
     for key in self.order:
       if key in self.sections:

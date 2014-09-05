@@ -117,6 +117,6 @@ class NoSuchSection(BadStructure):
 
 
 class NeglectedSections(BadStructure):
-  def __init__(self, sections):
+  def __init__(self, sections, order):
     super(NeglectedSections, self).__init__(
-        'Sections {} not included in ordering.'.format(sections))
+        'Sections {} not included in ordering {}.'.format(sections, order))
