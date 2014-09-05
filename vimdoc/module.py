@@ -338,6 +338,10 @@ def Modules(directory):
               flagblock.AddLine(
                   'Configures whether {} should be loaded.'.format(
                       relative_path))
+              default = 0 if flagname == 'plugin[mappings]' else 1
+              # Use unbulleted list to make sure it's on its own line. Use
+              # backtick to avoid helpfile syntax highlighting.
+              flagblock.AddLine(' - Default: {} `'.format(default))
               blocks.append(flagblock)
         paths_and_blocks.append((relative_path, blocks))
         if filename.startswith(autoloaddir):
