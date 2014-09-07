@@ -127,14 +127,21 @@ True
 >>> setting_line.match('let g:myglobal_var = 1').groups()
 ('myglobal_var',)
 
->>> flag_line.match("call s:plugin.Flag('myflag')").groups()
-('myflag', None)
->>> flag_line.match('cal g:my["flags"].Flag("myflag")').groups()
-(None, 'myflag')
->>> flag_line.match("call s:plugin.Flag('Some weird '' flag')").groups()
-("Some weird '' flag", None)
->>> flag_line.match(r'call s:plugin.Flag("Another \\" weird flag")').groups()
-(None, 'Another \\\\" weird flag')
+>>> flag_line.match("call s:plugin.Flag('myflag')")
+>>> flag_line.match("call s:plugin.Flag('myflag', 0)").groups()
+('myflag', None, '0')
+>>> flag_line.match('cal g:my["flags"].Flag("myflag", 1)').groups()
+(None, 'myflag', '1')
+>>> flag_line.match("call s:plugin.Flag('Some weird '' flag', 'X')").groups()
+("Some weird '' flag", None, "'X'")
+>>> flag_line.match(
+...     r'call s:plugin.Flag("Another \\" weird flag", [])').groups()
+(None, 'Another \\\\" weird flag', '[]')
+>>> flag_line.match("call s:plugin.Flag('myflag', 1)").groups()
+('myflag', None, '1')
+>>> flag_line.match('call s:plugin.Flag("myflag",   '
+...     "get(g:, 'foo', [])  )").groups()
+(None, 'myflag', "get(g:, 'foo', [])")
 
 >>> numbers_args.match('1 two 3')
 >>> numbers_args.match('1 2 3').groups()
@@ -149,8 +156,8 @@ True
 >>> inline_directive.match('@function(bar)').groups()
 ('function', 'bar')
 >>> inline_directive.sub(
-...      lambda match: '[{}]'.format(match.group(2)),
-...      'foo @function(bar) baz @link(quux) @this')
+...     lambda match: '[{}]'.format(match.group(2)),
+...     'foo @function(bar) baz @link(quux) @this')
 'foo [bar] baz [quux] [None]'
 
 >>> function_arg.findall('foo, bar, baz, ...')
@@ -316,11 +323,7 @@ setting_line = re.compile(r"""
 setting_scope = re.compile(r'[a-z]:')
 flag_line = re.compile(r"""
   # Definition start.
-  ^\s*call?\s*
-  # A bunch of stuff.
-  .*
-  # .Flag or ['Flag'] or something.
-  (?:\.Flag|\[['"]Flag['"]])\(
+  ^\s*call?\s*.*\.Flag\(
   # Shit's about to get real.
   (?:
     # GROUP 1: The flag name in single quotes.
@@ -333,7 +336,18 @@ flag_line = re.compile(r"""
       # No escapes or double quotes, or one escaped anything.
       (?:[^\\"]|\\.)*
     )"
-  )
+  ),\s*
+  (?:
+    # GROUP 3: Default value.
+    ((?:
+      # Any non-parenthesis character.
+      [^()]
+    | # Any non-parenthesis character inside a pair of parentheses. Doesn't
+      # handle nesting to arbitrary depth.
+      \([^()]+\)
+    )+?)
+    \s*\)
+  )?
 """, re.VERBOSE)
 inline_directive = re.compile(r'@([a-zA-Z_][a-zA-Z0-9_]*)(?:\(([^\s)]+)\))?')
 

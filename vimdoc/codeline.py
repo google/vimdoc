@@ -2,6 +2,7 @@
 import abc
 
 import vimdoc
+import vimdoc.block
 
 
 class CodeLine(object):
@@ -129,5 +130,18 @@ class Setting(Definition):
 
 
 class Flag(Definition):
-  def __init__(self, name):
+  def __init__(self, name, default):
     super(Flag, self).__init__(vimdoc.FLAG, name)
+    self._default = default
+
+  def Affect(self, blocks, selection):
+    # Add line to show expression for default value. Can be None if vimdoc
+    # failed to parse a default, e.g. due to deeply-nested parentheses.
+    if self._default is not None:
+      # Append to last block, creating one if there isn't one yet.
+      if not blocks:
+        blocks.append(vimdoc.block.Block())
+      # Use unbulleted list to make sure it's on its own line. Use backtick to
+      # avoid helpfile syntax highlighting.
+      blocks[-1].AddLine(' - Default: {} `'.format(self._default))
+    return super(Flag, self).Affect(blocks, selection)

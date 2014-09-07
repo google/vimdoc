@@ -97,8 +97,8 @@ def ParseCodeLine(line):
     return codeline.Setting('g:' + name)
   flagmatch = regex.flag_line.match(line)
   if flagmatch:
-    a, b = flagmatch.groups()
-    return codeline.Flag(a or b)
+    a, b, default = flagmatch.groups()
+    return codeline.Flag(a or b, default)
   return codeline.Unrecognized(line)
 
 
