@@ -14,9 +14,16 @@ class Block(object):
   They consist of a number of paragraphs and an optional header. The paragraphs
   can come in many types, including text, lists, or code. The block may also
   contain metadata statements specifying things like the plugin author, etc.
+
+  Args:
+    is_secondary: Whether there are other blocks above this one that describe
+        the same item. Only primary blocks should have tags, not secondary
+        blocks.
+    is_default: Whether other blocks with the same type and tag should override
+        this one and prevent this block from showing up in the docs.
   """
 
-  def __init__(self, is_secondary=False):
+  def __init__(self, is_secondary=False, is_default=False):
     # May include:
     # deprecated (boolean)
     # dict (name)
@@ -41,6 +48,7 @@ class Block(object):
     self._optional_args = []
     self._closed = False
     self._is_secondary = is_secondary
+    self._is_default = is_default
 
   def AddLine(self, line):
     """Adds a line of text to the block. Paragraph type is auto-determined."""
@@ -249,6 +257,10 @@ class Block(object):
     if typ == vimdoc.COMMAND:
       return ':{}'.format(self.FullName())
     return self.FullName()
+
+  def IsDefault(self):
+    """Whether this block is a default only as opposed to an explicit block."""
+    return self._is_default
 
   def _ParseArgs(self, args):
     # Removes duplicates but retains order:
