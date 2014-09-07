@@ -53,10 +53,16 @@ class Module(object):
     self.plugin.Merge(block)
 
     # Sections and Backmatter are specially treated.
+    block_id = block.locals.get('id')
     if typ == vimdoc.SECTION:
-      self.sections[block.locals.get('id')] = block
+      # Overwrite existing section if it's a default.
+      if block_id not in self.sections or self.sections[block_id].IsDefault():
+        self.sections[block_id] = block
     elif typ == vimdoc.BACKMATTER:
-      self.backmatters[block.locals.get('id')] = block
+      # Overwrite existing section backmatter if it's a default.
+      if (block_id not in self.backmatters
+          or self.backmatters[block_id].IsDefault()):
+        self.backmatters[block_id] = block
     else:
       collection_type = self.plugin.GetCollectionType(block)
       if collection_type is not None:
@@ -119,6 +125,17 @@ class Module(object):
       dicts.SetType(vimdoc.SECTION)
       dicts.Local(id='dicts', name='Dictionaries')
       self.Merge(dicts)
+    if self.GetCollection(vimdoc.FLAG):
+      # If any maktaba flags were documented, add a default configuration
+      # section to explain how to use them.
+      config = Block(is_default=True)
+      config.SetType(vimdoc.SECTION)
+      config.Local(id='config', name='Configuration')
+      config.AddLine(
+          'This plugin uses maktaba flags for configuration. Install Glaive'
+          ' (https://github.com/google/glaive) and use the @command(Glaive)'
+          ' command to configure them.')
+      self.Merge(config)
     if ((self.GetCollection(vimdoc.FLAG) or
          self.GetCollection(vimdoc.SETTING)) and
         'config' not in self.sections):
