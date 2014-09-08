@@ -1,26 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
-import argparse
-import os
+import vimdoc.__main__
 
-from vimdoc.module import Modules
-from vimdoc.output import Helpfile
-
-
-def Source(path):
-  if not os.path.isdir(path):
-    raise argparse.ArgumentTypeError('{} not found'.format(path))
-  if not os.access(path, os.R_OK):
-    raise argparse.ArgumentTypeError('Cannot access {}'.format(path))
-  return path
-
-parser = argparse.ArgumentParser(description='Generate vim helpfiles')
-parser.add_argument('plugin', type=Source, metavar='PLUGIN')
-args = parser.parse_args()
-
-docdir = os.path.join(args.plugin, 'doc')
-if not os.path.isdir(docdir):
-  os.mkdir(docdir)
-
-for module in Modules(args.plugin):
-  Helpfile(module, docdir).Write()
+vimdoc.__main__.main()

@@ -1,7 +1,6 @@
 """Vim helpfile outputter."""
 import os
 import textwrap
-import warnings
 
 import vimdoc
 from vimdoc import error
