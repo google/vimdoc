@@ -324,6 +324,11 @@ def Modules(directory):
   standalone_paths = []
   autoloaddir = os.path.join(directory, 'autoload')
   for (root, dirs, files) in os.walk(directory):
+    # Visit files in a stable order, since the ordering of e.g. the Maktaba
+    # flags below depends upon the order that we visit the files.
+    dirs.sort()
+    files.sort()
+
     # Prune non-standard top-level dirs like 'test'.
     if root == directory:
       dirs[:] = [x for x in dirs if x in DOC_SUBDIRS + ['after']]
