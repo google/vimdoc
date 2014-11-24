@@ -179,7 +179,7 @@ class Helpfile(object):
     self.Print('=' * self.WIDTH)
 
   def WriteLine(self, text='', right='', indent=0, leader=None, fill=' '):
-    """Writes one line ouf output, breaking it up as needed."""
+    """Writes one line of output, breaking it up as needed."""
     if leader is not None:
       initial_indent = (indent * self.TAB) + leader
       subsequent_indent = (indent + 1) * self.TAB

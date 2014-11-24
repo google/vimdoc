@@ -147,7 +147,7 @@ class Block(object):
 
   def Default(self, arg, value):
     """Adds a line which sets the default value for an optional arg."""
-    # If you do "@default foo=[bar]" it's implied that [bar] preceeds [foo] in
+    # If you do "@default foo=[bar]" it's implied that [bar] precedes [foo] in
     # the argument list -- hence, we parse value before arg.
     self._ParseArgs(value)
     # The arg is assumed optional, since it can default to things.
@@ -203,7 +203,7 @@ class Block(object):
       if len(self._required_args) == len(sigargs):
         return self._required_args
       # We have no idea what they're doing. The function signature doesn't match
-      # the argumenst mentioned in the documentation.
+      # the arguments mentioned in the documentation.
       warnings.warn(
           'Arguments do not match function signature. '
           'Function signature arguments are {}. '

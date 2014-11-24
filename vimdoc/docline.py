@@ -148,7 +148,7 @@ class Dict(BlockDirective):
     if self.attribute:
       block.SetType(vimdoc.FUNCTION)
       block.Local(attribute=self.attribute)
-    # We can't set the dict type here because it may be set to Funtion type
+    # We can't set the dict type here because it may be set to Function type
     # later, and we don't want a type mismatch.
 
 

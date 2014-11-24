@@ -35,7 +35,7 @@ def EnumerateStripNewlinesAndJoinContinuations(lines):
     line = line.rstrip('\n')
     if IsContinuation(line):
       if cached is None:
-        raise error.CannotContinue('No preceeding line.', i)
+        raise error.CannotContinue('No preceding line.', i)
       elif IsComment(cached) and not IsComment(line):
         raise error.CannotContinue('No comment to continue.', i)
       else:
