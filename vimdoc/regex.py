@@ -110,7 +110,7 @@ True
 >>> stylizing_args.match('MyPlugin').groups()
 ('MyPlugin',)
 >>> stylizing_args.match('っoの').groups()
-('\\xe3\\x81\\xa3o\\xe3\\x81\\xae',)
+('っoの',)
 
 >>> function_line.match('foo bar')
 >>> function_line.match('fu MyFunction()').groups()
