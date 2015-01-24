@@ -39,7 +39,9 @@ class Helpfile(object):
     if self.module.plugin.tagline:
       line = '{}\t{}'.format(line, self.module.plugin.tagline)
     # Use Print directly vs. WriteLine so tab isn't expanded by TextWrapper.
-    self.Print(line)
+    # Bypass wrapping and length checking since tagline can be arbitrarily long
+    # and should be entirely on line 1 for vim's local-additions.
+    self.Print(line, wide=True)
     # Next write a line with the author (if present) and tags.
     tag = self.Tag(self.module.name)
     if self.module.plugin.stylization:
@@ -167,9 +169,10 @@ class Helpfile(object):
     for line in lines:
       self.Print(line)
 
-  def Print(self, line, end='\n'):
+  def Print(self, line, end='\n', wide=False):
     """Outputs a line to the file."""
-    assert len(line) <= self.WIDTH
+    if not wide:
+      assert len(line) <= self.WIDTH
     if self.file is None:
       raise ValueError('Helpfile writer not yet given helpfile to write.')
     self.file.write(line + end)
