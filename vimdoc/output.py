@@ -34,13 +34,13 @@ class Helpfile(object):
   def WriteHeader(self):
     """Writes a plugin header."""
     # The first line should conform to ':help write-local-help', with a tag for
-    # the filename followed by a tab and the tagline (if present).
+    # the filename followed by a tab and the tagline (if present). Line 1 will
+    # not be wrapped at WIDTH since the first line has special semantics.
     line = self.Tag(self.Filename())
     if self.module.plugin.tagline:
       line = '{}\t{}'.format(line, self.module.plugin.tagline)
-    # Use Print directly vs. WriteLine so tab isn't expanded by TextWrapper.
-    # Bypass wrapping and length checking since tagline can be arbitrarily long
-    # and should be entirely on line 1 for vim's local-additions.
+    # Use Print directly vs. WriteLine so tab isn't expanded by TextWrapper, and
+    # to bypass line wrapping at WIDTH.
     self.Print(line, wide=True)
     # Next write a line with the author (if present) and tags.
     tag = self.Tag(self.module.name)
