@@ -34,12 +34,14 @@ class Helpfile(object):
   def WriteHeader(self):
     """Writes a plugin header."""
     # The first line should conform to ':help write-local-help', with a tag for
-    # the filename followed by a tab and the tagline (if present).
+    # the filename followed by a tab and the tagline (if present). Line 1 will
+    # not be wrapped at WIDTH since the first line has special semantics.
     line = self.Tag(self.Filename())
     if self.module.plugin.tagline:
       line = '{}\t{}'.format(line, self.module.plugin.tagline)
-    # Use Print directly vs. WriteLine so tab isn't expanded by TextWrapper.
-    self.Print(line)
+    # Use Print directly vs. WriteLine so tab isn't expanded by TextWrapper, and
+    # to bypass line wrapping at WIDTH.
+    self.Print(line, wide=True)
     # Next write a line with the author (if present) and tags.
     tag = self.Tag(self.module.name)
     if self.module.plugin.stylization:
@@ -167,9 +169,10 @@ class Helpfile(object):
     for line in lines:
       self.Print(line)
 
-  def Print(self, line, end='\n'):
+  def Print(self, line, end='\n', wide=False):
     """Outputs a line to the file."""
-    assert len(line) <= self.WIDTH
+    if not wide:
+      assert len(line) <= self.WIDTH
     if self.file is None:
       raise ValueError('Helpfile writer not yet given helpfile to write.')
     self.file.write(line + end)
