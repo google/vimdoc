@@ -187,6 +187,7 @@ Helpfile Structure
 
 The generated helpfile for a plugin has the following structure:
 
+```
 Header
 Table of Contents
 1. Introduction
@@ -197,6 +198,7 @@ Table of Contents
 7. Functions
 8. Mappings
 9. About
+```
 
 All of these (except Header and Table of Contents) are optional and predicated
 upon the comment blocks existing in the right places in the file. You may
