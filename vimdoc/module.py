@@ -19,6 +19,8 @@ DOC_SUBDIRS = [
     'indent',
     'ftdetect',
     'ftplugin',
+    'spell',
+    'colors',
 ]
 
 
