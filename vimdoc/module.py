@@ -145,21 +145,32 @@ class Module(object):
       config = Block(vimdoc.SECTION)
       config.Local(id='config', name='Configuration')
       self.Merge(config)
-    if not self.order:
-      self.order = []
-      for builtin in [
-          'intro',
-          'config',
-          'commands',
-          'autocmds',
-          'settings',
-          'dicts',
-          'functions',
-          'exceptions',
-          'mappings',
-          'about']:
-        if builtin in self.sections or builtin in self.backmatters:
-          self.order.append(builtin)
+
+    # Use explicit order as partial ordering and merge with default section
+    # ordering. All custom sections must be ordered explicitly.
+    # Custom sections will be ordered after all sections besides 'about'.
+    order = self.order or []
+    builtins_pre = []
+    for builtin in [
+        'intro',
+        'config',
+        'commands',
+        'autocmds',
+        'settings',
+        'dicts',
+        'functions',
+        'exceptions',
+        'mappings']:
+      if builtin in self.sections or builtin in self.backmatters:
+        if builtin not in order:
+          builtins_pre.append(builtin)
+    order = builtins_pre + order
+    for builtin in ['about']:
+      if builtin in self.sections or builtin in self.backmatters:
+        if builtin not in order:
+          order.append(builtin)
+    self.order = order
+
     for backmatter in self.backmatters:
       if backmatter not in self.sections:
         raise error.NoSuchSection(backmatter)
