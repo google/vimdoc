@@ -116,6 +116,18 @@ class NoSuchSection(BadStructure):
         'Section {} never defined.'.format(section))
 
 
+class DuplicateSection(BadStructure):
+  def __init__(self, section):
+    super(DuplicateSection, self).__init__(
+        'Duplicate section {} defined.'.format(section))
+
+
+class DuplicateBackmatter(BadStructure):
+  def __init__(self, section):
+    super(DuplicateBackmatter, self).__init__(
+        'Duplicate backmatter defined for section {}.'.format(section))
+
+
 class NeglectedSections(BadStructure):
   def __init__(self, sections, order):
     super(NeglectedSections, self).__init__(

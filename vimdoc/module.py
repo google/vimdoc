@@ -60,11 +60,17 @@ class Module(object):
       # Overwrite existing section if it's a default.
       if block_id not in self.sections or self.sections[block_id].IsDefault():
         self.sections[block_id] = block
+      elif not block.IsDefault():
+        # Tried to overwrite explicit section with explicit section.
+        raise error.DuplicateSection(block_id)
     elif typ == vimdoc.BACKMATTER:
       # Overwrite existing section backmatter if it's a default.
       if (block_id not in self.backmatters
           or self.backmatters[block_id].IsDefault()):
         self.backmatters[block_id] = block
+      elif not block.IsDefault():
+        # Tried to overwrite explicit backmatter with explicit backmatter.
+        raise error.DuplicateBackmatter(block_id)
     else:
       collection_type = self.plugin.GetCollectionType(block)
       if collection_type is not None:
@@ -107,31 +113,26 @@ class Module(object):
     All default sections that have not been overridden will be created.
     """
     if self.GetCollection(vimdoc.FUNCTION) and 'functions' not in self.sections:
-      functions = Block()
-      functions.SetType(vimdoc.SECTION)
+      functions = Block(vimdoc.SECTION)
       functions.Local(id='functions', name='Functions')
       self.Merge(functions)
     if (self.GetCollection(vimdoc.EXCEPTION)
         and 'exceptions' not in self.sections):
-      exceptions = Block()
-      exceptions.SetType(vimdoc.SECTION)
+      exceptions = Block(vimdoc.SECTION)
       exceptions.Local(id='exceptions', name='Exceptions')
       self.Merge(exceptions)
     if self.GetCollection(vimdoc.COMMAND) and 'commands' not in self.sections:
-      commands = Block()
-      commands.SetType(vimdoc.SECTION)
+      commands = Block(vimdoc.SECTION)
       commands.Local(id='commands', name='Commands')
       self.Merge(commands)
     if self.GetCollection(vimdoc.DICTIONARY) and 'dicts' not in self.sections:
-      dicts = Block()
-      dicts.SetType(vimdoc.SECTION)
+      dicts = Block(vimdoc.SECTION)
       dicts.Local(id='dicts', name='Dictionaries')
       self.Merge(dicts)
     if self.GetCollection(vimdoc.FLAG):
       # If any maktaba flags were documented, add a default configuration
       # section to explain how to use them.
-      config = Block(is_default=True)
-      config.SetType(vimdoc.SECTION)
+      config = Block(vimdoc.SECTION, is_default=True)
       config.Local(id='config', name='Configuration')
       config.AddLine(
           'This plugin uses maktaba flags for configuration. Install Glaive'
@@ -141,8 +142,7 @@ class Module(object):
     if ((self.GetCollection(vimdoc.FLAG) or
          self.GetCollection(vimdoc.SETTING)) and
         'config' not in self.sections):
-      config = Block()
-      config.SetType(vimdoc.SECTION)
+      config = Block(vimdoc.SECTION)
       config.Local(id='config', name='Configuration')
       self.Merge(config)
     if not self.order:
@@ -249,8 +249,7 @@ class VimPlugin(object):
         block = candidates[0]
     if block is None:
       # Create a dummy block to get default tag.
-      block = Block()
-      block.SetType(typ)
+      block = Block(typ)
       block.Local(name=fullname)
     return block.TagName()
 
@@ -353,8 +352,7 @@ def Modules(directory):
               flagpath = relative_path
               if flagpath.startswith('after' + os.path.sep):
                 flagpath = os.path.relpath(flagpath, 'after')
-              flagblock = Block(is_default=True)
-              flagblock.SetType(vimdoc.FLAG)
+              flagblock = Block(vimdoc.FLAG, is_default=True)
               name_parts = os.path.splitext(flagpath)[0].split(os.path.sep)
               flagname = name_parts.pop(0)
               flagname += ''.join('[' + p + ']' for p in name_parts)

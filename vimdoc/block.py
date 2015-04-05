@@ -16,6 +16,7 @@ class Block(object):
   contain metadata statements specifying things like the plugin author, etc.
 
   Args:
+    type: Block type, e.g. vim.SECTION or vim.FUNCTION.
     is_secondary: Whether there are other blocks above this one that describe
         the same item. Only primary blocks should have tags, not secondary
         blocks.
@@ -23,7 +24,7 @@ class Block(object):
         this one and prevent this block from showing up in the docs.
   """
 
-  def __init__(self, is_secondary=False, is_default=False):
+  def __init__(self, type=None, is_secondary=False, is_default=False):
     # May include:
     # deprecated (boolean)
     # dict (name)
@@ -34,6 +35,8 @@ class Block(object):
     # namespace (of function)
     # attribute (of function in dict)
     self.locals = {}
+    if type is not None:
+      self.SetType(type)
     # Merged into module. May include:
     # author (string)
     # library (boolean)
