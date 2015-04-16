@@ -146,35 +146,14 @@ class Module(object):
       config.Local(id='config', name='Configuration')
       self.Merge(config)
 
-    # Use explicit order as partial ordering and merge with default section
-    # ordering. All custom sections must be ordered explicitly.
-    # Custom sections will be ordered after all sections besides 'about'.
-    order = self.order or []
-    builtins_pre = []
-    for builtin in [
-        'intro',
-        'config',
-        'commands',
-        'autocmds',
-        'settings',
-        'dicts',
-        'functions',
-        'exceptions',
-        'mappings']:
-      if builtin in self.sections or builtin in self.backmatters:
-        if builtin not in order:
-          builtins_pre.append(builtin)
-    order = builtins_pre + order
-    for builtin in ['about']:
-      if builtin in self.sections or builtin in self.backmatters:
-        if builtin not in order:
-          order.append(builtin)
-    self.order = order
-
     for backmatter in self.backmatters:
       if backmatter not in self.sections:
         raise error.NoSuchSection(backmatter)
-    known = set(self.sections) | set(self.backmatters)
+    # Use explicit order as partial ordering and merge with default section
+    # ordering. All custom sections must be ordered explicitly.
+    self.order = self._GetSectionOrder(self.order, self.sections)
+
+    known = set(self.sections)
     neglected = sorted(known.difference(self.order))
     if neglected:
       raise error.NeglectedSections(neglected, self.order)
@@ -211,6 +190,46 @@ class Module(object):
       if ident in self.backmatters:
         yield self.backmatters[ident]
 
+  @staticmethod
+  def _GetSectionOrder(explicit_order, sections):
+    """Gets final section order from explicit_order and actual sections present.
+
+    Built-in sections with no explicit order come before custom sections, with
+    two exceptions:
+      * The "about" section comes last by default.
+      * If a built-in section is explicitly ordered, it "resets" the ordering so
+        so that subsequent built-in sections come directly after it.
+    This yields the order you would intuitively expect in cases like ordering
+    "intro" after other sections.
+    """
+    order = explicit_order or []
+    default_order = [
+      'intro',
+      'config',
+      'commands',
+      'autocmds',
+      'settings',
+      'dicts',
+      'functions',
+      'exceptions',
+      'mappings']
+    # Add any undeclared sections before custom sections, except 'about' which
+    # comes at the end by default.
+    section_insertion_idx = 0
+    order = order[:]
+    for builtin in default_order:
+      if builtin in order:
+        # Section already present. Skip and continue later sections after it.
+        section_insertion_idx = order.index(builtin) + 1
+        continue
+      else:
+        # If section present, insert into order at logical index.
+        if builtin in sections:
+          order.insert(section_insertion_idx, builtin)
+          section_insertion_idx += 1
+    if 'about' in sections and 'about' not in order:
+      order.append('about')
+    return order
 
 class VimPlugin(object):
   """State for entire plugin (potentially multiple modules)."""
