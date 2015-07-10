@@ -136,6 +136,8 @@ Available block directives include:
 - `@default arg=value` describes the default value of an optional arg.
 - `@throws exception` describes the type of exceptions that a function or
   command may throw.
+- `@deprecated reason` marks a command or function as deprecated and excludes it
+  from the docs.
 
 The global directives (@stylized, @order, and @library) are all detected from
 inside a @section block (usually the Introduction section).
