@@ -126,6 +126,8 @@ True
 >>> setting_line.match('let s:myglobal_var = 1')
 >>> setting_line.match('let g:myglobal_var = 1').groups()
 ('myglobal_var',)
+>>> setting_line.match('let g:mysettings.var = 0').groups()
+('mysettings.var',)
 
 >>> flag_line.match("call s:plugin.Flag('myflag')")
 >>> flag_line.match("call s:plugin.Flag('myflag', 0)").groups()
@@ -317,8 +319,8 @@ setting_line = re.compile(r"""
   # Definition start.
   ^\s*let\s+g:
   # GROUP 1: Setting name.
-  # May include [] (indexing) and {} (interpolation).
-  ([a-zA-Z_][a-zA-Z0-9_{}\[\]]*)
+  # May include [] (indexing), {} (interpolation), and . (dict of settings).
+  ([a-zA-Z_][a-zA-Z0-9_{}\[\].]*)
 """, re.VERBOSE)
 setting_scope = re.compile(r'[a-z]:')
 flag_line = re.compile(r"""
