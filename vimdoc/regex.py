@@ -211,13 +211,22 @@ section_args = re.compile(r"""
   # MATCH GROUP 1: The Name
   (
     # Non-commas or escaped commas or escaped escapes.
-    (?:[^\\,]|\\.)+
+    # Must not end with a space.
+    (?:[^\\,<]|\\.)+\S
   )
   # Optional identifier
   (?:
     # Separated by comma and whitespace.
-    ,\s*
+    \s*,\s*
     # MATCHGROUP 2: The identifier
+    ([a-zA-Z_-][a-zA-Z0-9_-]*)
+    \s*
+  )?
+  # Optional parent id
+  (?:
+    # Separated by < and whitespace.
+    \s*<\s*
+    # MATCHGROUP 3: The identifier
     ([a-zA-Z_-][a-zA-Z0-9_-]*)
   )?
   $

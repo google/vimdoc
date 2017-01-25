@@ -56,12 +56,22 @@ class Helpfile(object):
     """Writes the table of contents."""
     self.WriteRow()
     self.WriteLine('CONTENTS', right=self.Tag(self.Slug('contents')))
-    for i, block in enumerate(self.module.sections.values()):
+    # We need to keep track of section numbering on a per-level basis
+    count = [{'level': 0, 'index': 0}]
+    for block in self.module.sections.values():
       assert 'id' in block.locals
       assert 'name' in block.locals
-      line = '%d. %s' % (i + 1, block.locals['name'])
+      level = block.locals['level']
+      while level < count[-1]['level']:
+        count.pop()
+      if level == count[-1]['level']:
+        count[-1]['index'] += 1
+      else:
+        count.append({'level': level, 'index': 1})
+      line = '%d. %s' % (count[-1]['index'], block.locals['name'])
       slug = self.Slug(block.locals['id'])
-      self.WriteLine(line, indent=1, right=self.Link(slug), fill='.')
+      indent = 2 * count[-1]['level'] + 1
+      self.WriteLine(line, indent=indent, right=self.Link(slug), fill='.')
     self.WriteLine()
 
   def WriteChunk(self, chunk):

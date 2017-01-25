@@ -64,6 +64,61 @@ class TestVimModule(unittest.TestCase):
     main_module.Close()
     self.assertEqual([commands, about, intro], list(main_module.Chunks()))
 
+  def test_child_sections(self):
+    """Sections should be ordered after their parents."""
+    plugin = module.VimPlugin('myplugin')
+    main_module = module.Module('myplugin', plugin)
+    first = Block(vimdoc.SECTION)
+    first.Local(name='Section 1', id='first')
+    # Configure explicit order.
+    first.Global(order=['first', 'second', 'third'])
+    second = Block(vimdoc.SECTION)
+    second.Local(name='Section 2', id='second')
+    third = Block(vimdoc.SECTION)
+    third.Local(name='Section 3', id='third')
+    child11 = Block(vimdoc.SECTION)
+    child11.Local(name='child11', id='child11', parent_id='first')
+    child12 = Block(vimdoc.SECTION)
+    child12.Local(name='child12', id='child12', parent_id='first')
+    child21 = Block(vimdoc.SECTION)
+    child21.Local(name='child21', id='child21', parent_id='second')
+    # Merge in arbitrary order.
+    for m in [second, child12, third, child11, first, child21]:
+      main_module.Merge(m)
+    main_module.Close()
+    self.assertEqual(
+        [first, child11, child12, second, child21, third],
+        list(main_module.Chunks()))
+
+  def test_missing_parent(self):
+    """Parent sections should exist."""
+    plugin = module.VimPlugin('myplugin')
+    main_module = module.Module('myplugin', plugin)
+    first = Block(vimdoc.SECTION)
+    first.Local(name='Section 1', id='first')
+    second = Block(vimdoc.SECTION)
+    second.Local(name='Section 2', id='second', parent_id='missing')
+    main_module.Merge(first)
+    main_module.Merge(second)
+    with self.assertRaises(error.NoSuchSection) as cm:
+      main_module.Close()
+    self.assertEqual(('Section missing never defined.',), cm.exception.args)
+
+  def test_ordered_child(self):
+    """Child sections should not be included in @order."""
+    plugin = module.VimPlugin('myplugin')
+    main_module = module.Module('myplugin', plugin)
+    first = Block(vimdoc.SECTION)
+    first.Local(name='Section 1', id='first')
+    second = Block(vimdoc.SECTION)
+    second.Local(name='Section 2', id='second', parent_id='first')
+    first.Global(order=['first', 'second'])
+    main_module.Merge(first)
+    main_module.Merge(second)
+    with self.assertRaises(error.OrderedChildSections) as cm:
+      main_module.Close()
+    self.assertEqual(("Child section second included in ordering ['first', 'second'].",), cm.exception.args)
+
   def test_partial_ordering(self):
     """Always respect explicit order and prefer built-in ordering.
 

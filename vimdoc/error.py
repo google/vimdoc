@@ -132,3 +132,9 @@ class NeglectedSections(BadStructure):
   def __init__(self, sections, order):
     super(NeglectedSections, self).__init__(
         'Sections {} not included in ordering {}.'.format(sections, order))
+
+
+class OrderedChildSections(BadStructure):
+  def __init__(self, section, order):
+    super(OrderedChildSections, self).__init__(
+        'Child section {} included in ordering {}.'.format(section, order))

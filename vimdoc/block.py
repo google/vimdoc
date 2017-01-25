@@ -32,6 +32,9 @@ class Block(object):
     # name (of section)
     # type (constant, e.g. vimdoc.FUNCTION)
     # id (of section, in section or backmatter)
+    # parent_id (in section)
+    # children (in section)
+    # level (in section, tracks nesting level)
     # namespace (of function)
     # attribute (of function in dict)
     self.locals = {}

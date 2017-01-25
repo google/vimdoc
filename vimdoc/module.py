@@ -149,19 +149,60 @@ class Module(object):
     for backmatter in self.backmatters:
       if backmatter not in self.sections:
         raise error.NoSuchSection(backmatter)
+
     # Use explicit order as partial ordering and merge with default section
     # ordering. All custom sections must be ordered explicitly.
     self.order = self._GetSectionOrder(self.order, self.sections)
+
+    # Child section collection
+    to_delete = []
+    for key in self.sections:
+      section = self.sections[key]
+      if 'parent_id' in section.locals and section.locals['parent_id']:
+        parent_id = section.locals['parent_id']
+        try:
+          parent = self.sections[parent_id]
+          if not 'children' in parent.locals:
+            parent.locals['children'] = []
+          parent.locals['children'].append(section)
+          to_delete.append(key)
+        except KeyError:
+          raise error.NoSuchSection(parent_id)
+
+    for key in to_delete:
+      self.sections.pop(key)
 
     known = set(self.sections)
     neglected = sorted(known.difference(self.order))
     if neglected:
       raise error.NeglectedSections(neglected, self.order)
-    # Sections are now in order.
+
+    # Reinsert top-level sections in the correct order, expanding the tree of
+    # child sections along the way so we have a linear list of sections to pass
+    # to the output functions.
+
+    # Helper function to recursively add children to self.sections.
+    # We add a 'level' variable to locals so that WriteTableOfContents can keep
+    # track of the nesting.
+    def _AddChildSections(section):
+      if not 'level' in section.locals:
+        section.locals['level'] = 0
+      if 'children' in section.locals:
+        sort_key = lambda s: s.locals['name']
+        for child in sorted(section.locals['children'], key = sort_key):
+          child.locals['level'] = section.locals['level'] + 1
+          self.sections[child.locals['id']] = child
+          _AddChildSections(child)
+
+    # Insert sections according to the @order directive
     for key in self.order:
       if key in self.sections:
+        section = self.sections.pop(key)
+        if 'parent_id' in section.locals and section.locals['parent_id']:
+          raise error.OrderedChildSections(section.locals['id'], self.order)
         # Move to end.
-        self.sections[key] = self.sections.pop(key)
+        self.sections[key] = section
+        _AddChildSections(section)
 
   def Chunks(self):
     for ident, section in self.sections.items():
