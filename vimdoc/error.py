@@ -116,6 +116,14 @@ class NoSuchSection(BadStructure):
         'Section {} never defined.'.format(section))
 
 
+class NoSuchParentSection(BadStructure):
+  def __init__(self, section, parent_id):
+    super(NoSuchParentSection, self).__init__(
+        ('Section {} has non-existent parent {}. '
+         'Try setting the id of the parent section explicitly.'
+        ).format(section, parent_id))
+
+
 class DuplicateSection(BadStructure):
   def __init__(self, section):
     super(DuplicateSection, self).__init__(

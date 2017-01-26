@@ -161,7 +161,8 @@ class Module(object):
       parent_id = section.locals.get('parent_id', None)
       if parent_id:
         if parent_id not in self.sections:
-          raise error.NoSuchSection(parent_id)
+          raise error.NoSuchParentSection(
+                  section.locals['name'], parent_id)
         parent = self.sections[parent_id]
         parent.locals.setdefault('children', []).append(section)
         to_delete.append(key)
@@ -186,7 +187,7 @@ class Module(object):
         section.locals['level'] = 0
       if 'children' in section.locals:
         sort_key = lambda s: s.locals['name']
-        for child in sorted(section.locals['children'], key = sort_key):
+        for child in sorted(section.locals['children'], key=sort_key):
           child.locals['level'] = section.locals['level'] + 1
           self.sections[child.locals['id']] = child
           _AddChildSections(child)

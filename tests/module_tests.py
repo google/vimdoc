@@ -100,9 +100,12 @@ class TestVimModule(unittest.TestCase):
     second.Local(name='Section 2', id='second', parent_id='missing')
     main_module.Merge(first)
     main_module.Merge(second)
-    with self.assertRaises(error.NoSuchSection) as cm:
+    with self.assertRaises(error.NoSuchParentSection) as cm:
       main_module.Close()
-    self.assertEqual(('Section missing never defined.',), cm.exception.args)
+    expected = (
+        'Section Section 2 has non-existent parent missing. '
+        'Try setting the id of the parent section explicitly.')
+    self.assertEqual((expected,), cm.exception.args)
 
   def test_ordered_child(self):
     """Child sections should not be included in @order."""
