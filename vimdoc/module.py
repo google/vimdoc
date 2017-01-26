@@ -158,16 +158,13 @@ class Module(object):
     to_delete = []
     for key in self.sections:
       section = self.sections[key]
-      if 'parent_id' in section.locals and section.locals['parent_id']:
-        parent_id = section.locals['parent_id']
-        try:
-          parent = self.sections[parent_id]
-          if not 'children' in parent.locals:
-            parent.locals['children'] = []
-          parent.locals['children'].append(section)
-          to_delete.append(key)
-        except KeyError:
+      parent_id = section.locals.get('parent_id', None)
+      if parent_id:
+        if parent_id not in self.sections:
           raise error.NoSuchSection(parent_id)
+        parent = self.sections[parent_id]
+        parent.locals.setdefault('children', []).append(section)
+        to_delete.append(key)
 
     for key in to_delete:
       self.sections.pop(key)
