@@ -38,9 +38,13 @@ True
 
 >>> section_args.match('')
 >>> section_args.match('Introduction').groups()
-('Introduction', None)
+('Introduction', None, None)
 >>> section_args.match('The Beginning, beg').groups()
-('The Beginning', 'beg')
+('The Beginning', 'beg', None)
+>>> section_args.match('Child, child < parent').groups()
+('Child', 'child', 'parent')
+>>> section_args.match('Child < parent').groups()
+('Child', None, 'parent')
 
 >>> backmatter_args.match('123')
 >>> backmatter_args.match('foo').groups()
