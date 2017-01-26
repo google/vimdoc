@@ -221,7 +221,7 @@ section_args = re.compile(r"""
   # Optional identifier
   (?:
     # Separated by comma and whitespace.
-    \s*,\s*
+    ,\s*
     # MATCHGROUP 2: The identifier
     ([a-zA-Z_-][a-zA-Z0-9_-]*)
     \s*
