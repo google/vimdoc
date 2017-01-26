@@ -116,6 +116,12 @@ class NoSuchSection(BadStructure):
         'Section {} never defined.'.format(section))
 
 
+class MisplacedParentSection(BadStructure):
+  def __init__(self, section):
+    super(MisplacedParentSection, self).__init__(
+        'Parent section {} defined outside a @section block.'.format(section))
+
+
 class NoSuchParentSection(BadStructure):
   def __init__(self, section, parent_id):
     super(NoSuchParentSection, self).__init__(

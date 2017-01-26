@@ -140,6 +140,12 @@ class Block(object):
     else:
       raise error.TypeConflict(ourtype, newtype)
 
+  def SetParentSection(self, parent_id):
+    """Sets the parent_id for blocks of type SECTION"""
+    if not (self.locals.get('type') == vimdoc.SECTION):
+      raise error.MisplacedParentSection(parent_id)
+    self.Local(parent_id=parent_id)
+
   def SetHeader(self, directive):
     """Sets the header handler."""
     if self.header:

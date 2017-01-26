@@ -114,15 +114,15 @@ Available block directives include:
 - `@public` marks a function public. In most plugins, functions are private by
   default, though this default may be overridden on a per-plugin basis.
 - `@private` marks a function private.
-- `@section name[, id][ < parent-id]` allows you to write a new section for the
+- `@section name[, id]` allows you to write a new section for the
   helpfile. The id will be a lowercased version of name if omitted.
-  If parent-id is supplied the section will be nested under the section with that
-  id.
+- `@parentsection id` defines the current section as a child of the given
+  section. Must be contained within a @section block.
 - `@subsection name` defines a subsection (heading) within a section block.
 - `@backmatter id` declares a block to be rendered at the end of the given
   section.
 - `@order ...` allows you to define the order of the sections. Sections with a
-  parent-id may not be included here.
+  @parentsection may not be included here.
 - `@dict name` (above blank lines) allows you to define a new dictionary.
 - `@dict dict.fn` (above a function) allows you to add a function to
   a dictionary.

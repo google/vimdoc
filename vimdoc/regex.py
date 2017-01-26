@@ -38,13 +38,13 @@ True
 
 >>> section_args.match('')
 >>> section_args.match('Introduction').groups()
-('Introduction', None, None)
+('Introduction', None)
 >>> section_args.match('The Beginning, beg').groups()
-('The Beginning', 'beg', None)
->>> section_args.match('Child, child < parent').groups()
-('Child', 'child', 'parent')
->>> section_args.match('Child < parent').groups()
-('Child', None, 'parent')
+('The Beginning', 'beg')
+
+>>> parent_section_args.match('123')
+>>> parent_section_args.match('foo').groups()
+('foo',)
 
 >>> backmatter_args.match('123')
 >>> backmatter_args.match('foo').groups()
@@ -216,7 +216,7 @@ section_args = re.compile(r"""
   (
     # Non-commas or escaped commas or escaped escapes.
     # Must not end with a space.
-    (?:[^\\,<]|\\.)+\S
+    (?:[^\\,]|\\.)+\S
   )
   # Optional identifier
   (?:
@@ -224,17 +224,10 @@ section_args = re.compile(r"""
     ,\s*
     # MATCHGROUP 2: The identifier
     ([a-zA-Z_-][a-zA-Z0-9_-]*)
-    \s*
-  )?
-  # Optional parent id
-  (?:
-    # Separated by < and whitespace.
-    \s*<\s*
-    # MATCHGROUP 3: The identifier
-    ([a-zA-Z_-][a-zA-Z0-9_-]*)
   )?
   $
 """, re.VERBOSE)
+parent_section_args = re.compile(r'([a-zA-Z_-][a-zA-Z0-9_-]*)')
 backmatter_args = re.compile(r'([a-zA-Z_-][a-zA-Z0-9_-]*)')
 dict_args = re.compile(r"""
   ^([a-zA-Z_][a-zA-Z0-9]*)(?:\.([a-zA-Z_][a-zA-Z0-9_]*))?$
