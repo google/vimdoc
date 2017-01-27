@@ -183,8 +183,7 @@ class Module(object):
     # We add a 'level' variable to locals so that WriteTableOfContents can keep
     # track of the nesting.
     def _AddChildSections(section):
-      if not 'level' in section.locals:
-        section.locals['level'] = 0
+      section.locals.setdefault('level', 0)
       if 'children' in section.locals:
         sort_key = lambda s: s.locals['name']
         for child in sorted(section.locals['children'], key=sort_key):

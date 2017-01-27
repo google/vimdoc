@@ -52,13 +52,11 @@ class Helpfile(object):
       self.WriteLine(right=tag)
     self.WriteLine()
 
-  def WriteTableOfContents(self):
-    """Writes the table of contents."""
-    self.WriteRow()
-    self.WriteLine('CONTENTS', right=self.Tag(self.Slug('contents')))
-    # We need to keep track of section numbering on a per-level basis
+  # Helper function for WriteTableOfContents().
+  def _EnumerateIndices(self, sections):
+    """Keep track of section numbering for each level of the tree"""
     count = [{'level': 0, 'index': 0}]
-    for block in self.module.sections.values():
+    for block in sections:
       assert 'id' in block.locals
       assert 'name' in block.locals
       level = block.locals['level']
@@ -68,10 +66,19 @@ class Helpfile(object):
         count[-1]['index'] += 1
       else:
         count.append({'level': level, 'index': 1})
-      line = '%d. %s' % (count[-1]['index'], block.locals['name'])
-      slug = self.Slug(block.locals['id'])
-      indent = 2 * count[-1]['level'] + 1
-      self.WriteLine(line, indent=indent, right=self.Link(slug), fill='.')
+      yield (count[-1]['index'], block)
+
+  def WriteTableOfContents(self):
+    """Writes the table of contents."""
+    self.WriteRow()
+    self.WriteLine('CONTENTS', right=self.Tag(self.Slug('contents')))
+    # We need to keep track of section numbering on a per-level basis
+    for index, block in self._EnumerateIndices(self.module.sections.values()):
+      self.WriteLine(
+          '%d. %s' % (index, block.locals['name']),
+          indent=2 * block.locals['level'] + 1,
+          right=self.Link(self.Slug(block.locals['id'])),
+          fill='.')
     self.WriteLine()
 
   def WriteChunk(self, chunk):
