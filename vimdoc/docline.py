@@ -180,8 +180,12 @@ class Public(BlockDirective):
 class Section(BlockDirective):
   REGEX = regex.section_args
 
+  def __init__(self, args):
+    super(Section, self).__init__(args)
+
   def Assign(self, name, ident):
     self.name = name.replace('\\,', ',').replace('\\\\', '\\')
+
     if ident is None:
       # If omitted, it's the name in lowercase, with spaces converted to dashes.
       ident = self.name.lower().replace(' ', '-')
@@ -190,6 +194,16 @@ class Section(BlockDirective):
   def Update(self, block):
     block.SetType(vimdoc.SECTION)
     block.Local(name=self.name, id=self.id)
+
+
+class ParentSection(BlockDirective):
+  REGEX = regex.parent_section_args
+
+  def Assign(self, name):
+    self.name = name.lower()
+
+  def Update(self, block):
+    block.SetParentSection(self.name)
 
 
 class Setting(BlockDirective):
@@ -384,6 +398,7 @@ BLOCK_DIRECTIVES = {
     'function': Function,
     'library': Library,
     'order': Order,
+    'parentsection': ParentSection,
     'private': Private,
     'public': Public,
     'section': Section,

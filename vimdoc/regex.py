@@ -42,6 +42,10 @@ True
 >>> section_args.match('The Beginning, beg').groups()
 ('The Beginning', 'beg')
 
+>>> parent_section_args.match('123')
+>>> parent_section_args.match('foo').groups()
+('foo',)
+
 >>> backmatter_args.match('123')
 >>> backmatter_args.match('foo').groups()
 ('foo',)
@@ -211,7 +215,8 @@ section_args = re.compile(r"""
   # MATCH GROUP 1: The Name
   (
     # Non-commas or escaped commas or escaped escapes.
-    (?:[^\\,]|\\.)+
+    # Must not end with a space.
+    (?:[^\\,]|\\.)+\S
   )
   # Optional identifier
   (?:
@@ -222,6 +227,7 @@ section_args = re.compile(r"""
   )?
   $
 """, re.VERBOSE)
+parent_section_args = re.compile(r'([a-zA-Z_-][a-zA-Z0-9_-]*)')
 backmatter_args = re.compile(r'([a-zA-Z_-][a-zA-Z0-9_-]*)')
 dict_args = re.compile(r"""
   ^([a-zA-Z_][a-zA-Z0-9]*)(?:\.([a-zA-Z_][a-zA-Z0-9_]*))?$

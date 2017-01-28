@@ -32,6 +32,9 @@ class Block(object):
     # name (of section)
     # type (constant, e.g. vimdoc.FUNCTION)
     # id (of section, in section or backmatter)
+    # parent_id (in section)
+    # children (in section)
+    # level (in section, tracks nesting level)
     # namespace (of function)
     # attribute (of function in dict)
     self.locals = {}
@@ -136,6 +139,12 @@ class Block(object):
       self.locals['type'] = newtype
     else:
       raise error.TypeConflict(ourtype, newtype)
+
+  def SetParentSection(self, parent_id):
+    """Sets the parent_id for blocks of type SECTION"""
+    if not (self.locals.get('type') == vimdoc.SECTION):
+      raise error.MisplacedParentSection(parent_id)
+    self.Local(parent_id=parent_id)
 
   def SetHeader(self, directive):
     """Sets the header handler."""
