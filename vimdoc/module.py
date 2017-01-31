@@ -112,43 +112,45 @@ class Module(object):
 
     All default sections that have not been overridden will be created.
     """
-    if self.GetCollection(vimdoc.FUNCTION) and 'functions' not in self.sections:
-      functions = Block(vimdoc.SECTION)
-      functions.Local(id='functions', name='Functions')
-      self.Merge(functions)
-    if (self.GetCollection(vimdoc.EXCEPTION)
-        and 'exceptions' not in self.sections):
-      exceptions = Block(vimdoc.SECTION)
-      exceptions.Local(id='exceptions', name='Exceptions')
-      self.Merge(exceptions)
-    if self.GetCollection(vimdoc.COMMAND) and 'commands' not in self.sections:
-      commands = Block(vimdoc.SECTION)
-      commands.Local(id='commands', name='Commands')
-      self.Merge(commands)
-    if self.GetCollection(vimdoc.DICTIONARY) and 'dicts' not in self.sections:
-      dicts = Block(vimdoc.SECTION)
-      dicts.Local(id='dicts', name='Dictionaries')
-      self.Merge(dicts)
+    # ----------------------------------------------------------
+    # Add default sections.
+
+    # type : (id, name)
+    default_sections = {
+        vimdoc.FUNCTION: ('functions', 'Functions'),
+        vimdoc.EXCEPTION: ('exceptions', 'Exceptions'),
+        vimdoc.COMMAND: ('commands', 'Commands'),
+        vimdoc.DICTIONARY: ('dicts', 'Dictionaries'),
+        vimdoc.FLAG: ('config', 'Configuration'),
+        vimdoc.SETTING: ('config', 'Configuration'),
+      }
+
+    for k, (id, name) in default_sections.items():
+      if self.GetCollection(k) and (id not in self.sections):
+        # Create the section if it does not exist.
+        block = Block(vimdoc.SECTION)
+        block.Local(id=id, name=name)
+        self.Merge(block)
+
+    # If any maktaba flags were documented, add a default configuration section
+    # to explain how to use them.
     if self.GetCollection(vimdoc.FLAG):
-      # If any maktaba flags were documented, add a default configuration
-      # section to explain how to use them.
-      config = Block(vimdoc.SECTION, is_default=True)
-      config.Local(id='config', name='Configuration')
-      config.AddLine(
+      block = Block(vimdoc.SECTION, is_default=True)
+      block.AddLine(
           'This plugin uses maktaba flags for configuration. Install Glaive'
           ' (https://github.com/google/glaive) and use the @command(Glaive)'
           ' command to configure them.')
-      self.Merge(config)
-    if ((self.GetCollection(vimdoc.FLAG) or
-         self.GetCollection(vimdoc.SETTING)) and
-        'config' not in self.sections):
-      config = Block(vimdoc.SECTION)
-      config.Local(id='config', name='Configuration')
-      self.Merge(config)
+      self.Merge(block)
+
+    # ----------------------------------------------------------
+    # Add backmatter.
 
     for backmatter in self.backmatters:
       if backmatter not in self.sections:
         raise error.NoSuchSection(backmatter)
+
+    # ----------------------------------------------------------
+    # Expand child sections and order the section list for output.
 
     # Use explicit order as partial ordering and merge with default section
     # ordering. All custom sections must be ordered explicitly.
@@ -170,6 +172,7 @@ class Module(object):
     for key in to_delete:
       self.sections.pop(key)
 
+    # Check that all top-level sections are included in ordering.
     known = set(self.sections)
     neglected = sorted(known.difference(self.order))
     if neglected:
