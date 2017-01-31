@@ -107,6 +107,19 @@ class Module(object):
     return [x for x in collection
         if not x.IsDefault() or x.TagName() not in non_default_names]
 
+  def _AddMaktabaFlagHelp(self):
+    """If any maktaba flags were documented, add a default configuration section
+     to explain how to use them.
+    """
+    if self.GetCollection(vimdoc.FLAG):
+      block = Block(vimdoc.SECTION, is_default=True)
+      block.Local(id='config', name='Configuration')
+      block.AddLine(
+          'This plugin uses maktaba flags for configuration. Install Glaive'
+          ' (https://github.com/google/glaive) and use the @command(Glaive)'
+          ' command to configure them.')
+      self.Merge(block)
+
   def Close(self):
     """Closes the module.
 
@@ -116,32 +129,25 @@ class Module(object):
     # Add default sections.
 
     # type : (id, name)
-    default_sections = {
-        vimdoc.FUNCTION: ('functions', 'Functions'),
-        vimdoc.EXCEPTION: ('exceptions', 'Exceptions'),
-        vimdoc.COMMAND: ('commands', 'Commands'),
-        vimdoc.DICTIONARY: ('dicts', 'Dictionaries'),
-        vimdoc.FLAG: ('config', 'Configuration'),
-        vimdoc.SETTING: ('config', 'Configuration'),
-      }
+    default_sections = [
+        (vimdoc.FUNCTION, 'functions', 'Functions'),
+        (vimdoc.EXCEPTION, 'exceptions', 'Exceptions'),
+        (vimdoc.COMMAND, 'commands', 'Commands'),
+        (vimdoc.DICTIONARY, 'dicts', 'Dictionaries'),
+        (vimdoc.FLAG, 'config', 'Configuration'),
+        (vimdoc.SETTING, 'config', 'Configuration'),
+      ]
 
-    for k, (id, name) in default_sections.items():
-      if self.GetCollection(k) and (id not in self.sections):
+    for (typ, id, name) in default_sections:
+      if typ == vimdoc.FLAG:
+        self._AddMaktabaFlagHelp()
+
+      if self.GetCollection(typ) and (id not in self.sections):
         # Create the section if it does not exist.
         block = Block(vimdoc.SECTION)
         block.Local(id=id, name=name)
         self.Merge(block)
 
-    # If any maktaba flags were documented, add a default configuration section
-    # to explain how to use them.
-    if self.GetCollection(vimdoc.FLAG):
-      block = Block(vimdoc.SECTION, is_default=True)
-      block.Local(id='config', name='Configuration')
-      block.AddLine(
-          'This plugin uses maktaba flags for configuration. Install Glaive'
-          ' (https://github.com/google/glaive) and use the @command(Glaive)'
-          ' command to configure them.')
-      self.Merge(block)
 
     # ----------------------------------------------------------
     # Add backmatter.
