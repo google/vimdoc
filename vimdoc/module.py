@@ -136,6 +136,7 @@ class Module(object):
     # to explain how to use them.
     if self.GetCollection(vimdoc.FLAG):
       block = Block(vimdoc.SECTION, is_default=True)
+      block.Local(id='config', name='Configuration')
       block.AddLine(
           'This plugin uses maktaba flags for configuration. Install Glaive'
           ' (https://github.com/google/glaive) and use the @command(Glaive)'
