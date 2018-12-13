@@ -1,5 +1,6 @@
 """Vimdoc plugin management."""
 from collections import OrderedDict
+import io
 import json
 import os
 import warnings
@@ -377,7 +378,7 @@ def Modules(directory):
   addon_info_path = os.path.join(directory, 'addon-info.json')
   if os.path.isfile(addon_info_path):
     try:
-      with open(addon_info_path, 'r') as addon_info_file:
+      with io.open(addon_info_path, 'r', encoding='utf-8') as addon_info_file:
         addon_info = json.loads(addon_info_file.read())
     except (IOError, ValueError) as e:
       warnings.warn(
@@ -417,7 +418,7 @@ def Modules(directory):
       filename = os.path.join(root, f)
       if os.path.splitext(filename)[1] == '.vim':
         relative_path = os.path.relpath(filename, directory)
-        with open(filename) as filehandle:
+        with io.open(filename, encoding='utf-8') as filehandle:
           lines = list(filehandle)
           blocks = list(parser.ParseBlocks(lines, filename))
           # Define implicit maktaba flags for files that call

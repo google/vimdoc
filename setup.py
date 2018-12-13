@@ -1,6 +1,6 @@
 """Distribution for vimdoc."""
-import codecs
 from distutils.core import setup
+import io
 import os.path
 import sys
 
@@ -12,7 +12,7 @@ if sys.version_info[0] < 3:
 
 
 VERSION_PATH = os.path.join(os.path.dirname(__file__), 'vimdoc/VERSION.txt')
-with codecs.open(VERSION_PATH, 'r', 'utf-8') as f:
+with io.open(VERSION_PATH, 'r', encoding='utf-8') as f:
   version = f.read().strip()
 
 LONG_DESCRIPTION = """
