@@ -491,7 +491,7 @@ def Modules(directory):
 
 
 def GetAutoloadNamespace(filepath):
-  return (os.path.splitext(filepath)[0]).replace('/', '#') + '#'
+  return (os.path.splitext(filepath)[0]).replace(os.path.sep, '#') + '#'
 
 
 def GetMatchingStandalonePath(path, standalones):
