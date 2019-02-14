@@ -25,6 +25,8 @@ class Helpfile(object):
 
   def Write(self):
     filename = os.path.join(self.docdir, self.Filename())
+    # Output POSIX line endings for portable output that can be published.
+    # They are displayed properly in vim on all platforms.
     with io.open(filename, 'w', encoding='utf-8', newline='\n') as self.file:
       self.WriteHeader()
       self.WriteTableOfContents()
