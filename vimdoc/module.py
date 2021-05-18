@@ -426,6 +426,7 @@ def Modules(directory):
           # because there aren't necessarily associated doc comment blocks and
           # the name is computed from the file name.
           if (not relative_path.startswith('autoload' + os.path.sep)
+              and relative_path != os.path.join('plugin', 'flags.vim')
               and relative_path != os.path.join('instant', 'flags.vim')):
             if ContainsMaktabaPluginEnterCall(lines):
               flagpath = relative_path
