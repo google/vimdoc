@@ -33,6 +33,7 @@ setup(
     scripts=[
         'scripts/vimdoc',
     ],
+    extras_require={'completion': ['shtab']},
     package_data={'vimdoc': ['VERSION.txt']},
     classifiers=[
         'Development Status :: 3 - Alpha',
