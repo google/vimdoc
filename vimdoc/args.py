@@ -3,6 +3,11 @@ import os
 
 import vimdoc
 
+try:
+    import shtab
+except ImportError:
+    from . import _shtab as shtab
+
 
 def Source(path):
   if not os.path.isdir(path):
@@ -11,7 +16,9 @@ def Source(path):
     raise argparse.ArgumentTypeError('Cannot access {}'.format(path))
   return path
 
-parser = argparse.ArgumentParser(description='Generate vim helpfiles')
-parser.add_argument('plugin', type=Source, metavar='PLUGIN')
+
+parser = argparse.ArgumentParser('vimdoc', description='Generate vim helpfiles')
+shtab.add_argument_to(parser)
+parser.add_argument('plugin', type=Source, metavar='PLUGIN').complete = shtab.DIR
 parser.add_argument('--version', action='version',
     version='%(prog)s ' + vimdoc.__version__)
