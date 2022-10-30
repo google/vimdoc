@@ -1,0 +1,11 @@
+---
+- id: vimdoc
+  name: vimdoc
+  description: "Helpfile generation for vim"
+  entry: vimdoc
+  language: python
+  pass_filenames: false
+  types:
+    - vim
+  args:
+    - .
