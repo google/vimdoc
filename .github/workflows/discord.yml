@@ -2,9 +2,9 @@ name: notify-discord
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
   issues:
     types: [opened]
 
