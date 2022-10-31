@@ -26,7 +26,7 @@ tags and so on.
 
 To see an example of vimdoc in use, see
 [maktaba](https://github.com/google/maktaba), specifically the
-[helloworld](https://github.com/google/maktaba/tree/master/examples/helloworld)
+[helloworld](https://github.com/google/maktaba/tree/HEAD/examples/helloworld)
 example plugin therein, which shows some of the basics.
 
 **Vimdoc is unstable**. It's a collection of regexes and hacks masquerading as
@@ -93,7 +93,7 @@ Vimdoc has a number of builtin directives, which are marked by @ signs.
 
 It also detects your plugin's addon-info.json file if present (see the
 [documentation](http://vim-wiki.mawercer.de/wiki/topic/addon-info.json.html) and
-relevant [VAM help](https://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager-additional-documentation.txt)).
+relevant [VAM help](https://github.com/MarcWeber/vim-addon-manager/blob/HEAD/doc/vim-addon-manager-additional-documentation.txt)).
 
 ### Block Directives
 
