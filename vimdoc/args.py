@@ -4,9 +4,9 @@ import os
 import vimdoc
 
 try:
-    import shtab
+  import shtab
 except ImportError:
-    from . import _shtab as shtab
+  from . import _shtab as shtab
 
 
 def Source(path):
