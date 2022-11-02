@@ -17,8 +17,18 @@ def Source(path):
   return path
 
 
-parser = argparse.ArgumentParser('vimdoc', description='Generate vim helpfiles')
+parser = argparse.ArgumentParser(
+    'vimdoc',
+    formatter_class=argparse.RawTextHelpFormatter,
+    description='''\
+Generate vim helpfiles
+
+Basic usage:
+  %(prog)s vim-someplugin/
+  (or %(prog)s .)''')
 shtab.add_argument_to(parser)
-parser.add_argument('plugin', type=Source, metavar='PLUGIN').complete = shtab.DIR
+parser.add_argument(
+    'plugin', type=Source, metavar='PLUGIN',
+    help='a vim plugin directory').complete = shtab.DIR
 parser.add_argument('--version', action='version',
     version='%(prog)s ' + vimdoc.__version__)
