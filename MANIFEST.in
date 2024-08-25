@@ -1,0 +1,4 @@
+include README.md
+include vimdoc/VERSION.txt
+
+graft tests

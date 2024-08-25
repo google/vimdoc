@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vimdoc"
+authors = [{name = "Nate Soares", email = "nate@so8r.es"}]
+readme = "README.md"
+license = {text = "Apache 2.0"}
+description = "Generate vim helpfiles"
+requires-python = ">= 3.4"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.4",
+    "Topic :: Software Development :: Documentation",
+]
+urls = {Repository = "https://github.com/google/vimdoc"}
+dynamic = ["version"]
+
+[project.optional-dependencies]
+completion = ["shtab"]
+
+[tool.setuptools]
+packages = ["vimdoc"]
+script-files = ["scripts/vimdoc"]
+
+[tool.setuptools.dynamic]
+version = { file = "VERSION.txt" }
