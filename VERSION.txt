@@ -1,1 +1,0 @@
-vimdoc/VERSION.txt
