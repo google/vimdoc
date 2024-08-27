@@ -1,4 +1,5 @@
 /deb_dist/
+/vimdoc/_version.py
 
 # Python.gitignore:
 # Byte-compiled / optimized / DLL files
