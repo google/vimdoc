@@ -12,7 +12,7 @@ True
 'bar'
 
 >>> line_continuation.match('  foo')
->>> line_continuation.match(' \\  foo') is not None
+>>> line_continuation.match(r' \\  foo') is not None
 True
 
 >>> blank_comment_line.match('')
