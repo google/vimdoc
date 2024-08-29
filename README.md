@@ -4,21 +4,25 @@ Vimdoc - Helpfile generation for vim plugins
 Vimdoc generates vim helpfiles from documentation in vimscript files. You
 annotate vimscript like this:
 
-    ""
-    " This is my function. It does different things to the {required} argument,
-    " depending upon the [optional] argument.
-    function! myplugin#MyFunction(required, ...) abort
-      ...
-    endfunction
+```viml
+""
+" This is my function. It does different things to the {required} argument,
+" depending upon the [optional] argument.
+function! myplugin#MyFunction(required, ...) abort
+  ...
+endfunction
+```
 
 and you get helpfiles that look like this:
 
-    ===========================================================================
-    FUNCTIONS                                              *myplugin-functions*
+```
+===========================================================================
+FUNCTIONS                                              *myplugin-functions*
 
-    myplugin#MyFunction({required}, [optional])         *myplugin#MyFunction()*
-      This is my function. It does different things to the {required} argument,
-      depending upon the [optional] argument.
+myplugin#MyFunction({required}, [optional])         *myplugin#MyFunction()*
+  This is my function. It does different things to the {required} argument,
+  depending upon the [optional] argument.
+```
 
 This allows you to keep all of your documentation in one place (the code!) and
 generate nicely formatted help files without manually aligning text and adding
@@ -36,11 +40,19 @@ continue to be useful while it gets cleaned up.
 Installation
 ------------
 
-Use setup.py to install vimdoc in the usual way. On most systems, this is:
+Install the latest release version from PyPI using pip or pipx:
 
-    python setup.py config
-    python setup.py build
-    sudo python setup.py install
+```shell
+pip install vimdoc[completion]
+# OR: pipx install vimdoc[completion]
+```
+
+Or to install from source, clone the vimdoc repository from GitHub, cd into the
+vimdoc directory, and run
+
+```shell
+pip install .[completion]
+```
 
 Execution
 ---------
@@ -60,9 +72,11 @@ Usage
 Vimdoc operates on comment blocks, which are a continuous group of lines
 starting with the "" header:
 
-    ""
-    " Documentation for function
-    function! ...
+```viml
+""
+" Documentation for function
+function! ...
+```
 
 Vimdoc automatically recognizes the type of these blocks. It can detect the
 following:
@@ -92,18 +106,22 @@ These defaults are usually correct, but can be overridden.
 Vimdoc has a number of builtin directives, which are marked by @ signs.
 
 It also detects your plugin's addon-info.json file if present (see the
-[documentation](http://vim-wiki.mawercer.de/wiki/topic/addon-info.json.html) and
-relevant [VAM help](https://github.com/MarcWeber/vim-addon-manager/blob/HEAD/doc/vim-addon-manager-additional-documentation.txt)).
+[addon-info.json
+documentation](http://web.archive.org/vim-wiki.mawercer.de/wiki/topic/addon-info.json.html)
+and relevant [VAM
+help](https://github.com/MarcWeber/vim-addon-manager/blob/HEAD/doc/vim-addon-manager-additional-documentation.txt)).
 
 ### Block Directives
 
 Block directives take up an entire line in the comment block. They look like
 this:
 
-    ""
-    " @usage req1 req2 \[opt1] \[opt2]
-    " description...
-    function! MyFunction(badName1, badName2, ...)
+```viml
+""
+" @usage req1 req2 \[opt1] \[opt2]
+" description...
+function! MyFunction(badName1, badName2, ...)
+```
 
 Available block directives include:
 
@@ -167,7 +185,7 @@ from other sources.
 
 By default, the `name` for the plugin is the name of its top-level directory. If
 an
-[addon-info.json](http://vim-wiki.mawercer.de/wiki/topic/addon-info.json.html)
+[addon-info.json](http://web.archive.org/vim-wiki.mawercer.de/wiki/topic/addon-info.json.html)
 file is present and contains an explicit "name" field, vimdoc will use that
 plugin name instead. This is important if the plugin lives in a directory with a
 "vim" prefix or suffix, such as "vim-dispatch". This plugin name will appear in
@@ -214,17 +232,21 @@ with the @section directive.
 The header is a simple line or two following the vim helpfile style guide. It
 looks something like:
 
-    *myplugin*     My Plugin’s Tagline
-    author                                                *Stylized-Name*
+```
+*myplugin*     My Plugin’s Tagline
+author                                                *Stylized-Name*
+```
 
 #### Table of Contents
 Of the form
 
-    =====================================================================
-    CONTENTS                                          *myplugin-contents*
-      1. Introduction                                    |myplugin-intro|
-      2. Configuration                                  |myplugin-config|
-      ...
+```
+=====================================================================
+CONTENTS                                          *myplugin-contents*
+  1. Introduction                                    |myplugin-intro|
+  2. Configuration                                  |myplugin-config|
+  ...
+```
 
 And so on for each section.
 
@@ -240,27 +262,33 @@ annotated by vimdoc comment blocks.
 Any global `let` command with a doc comment will automatically be detected as a
 setting:
 
-    ""
-    " Enable a thing.
-    let g:myplugin_enable_thing = 1
+```viml
+""
+" Enable a thing.
+let g:myplugin_enable_thing = 1
+```
 
 You can use the `@setting` block directive to declare settings vimdoc doesn't
 recognize:
 
-    ""
-    " @setting g:myplugin_secret_number
-    " A secret number.
-    echo 'The number is' get(g:, 'myplugin_secret_number', b:changedtick)
+```viml
+""
+" @setting g:myplugin_secret_number
+" A secret number.
+echo 'The number is' get(g:, 'myplugin_secret_number', b:changedtick)
 
-    ""
-    " @setting b:myplugin_enable_thing
-    " Enable a thing in the current buffer.
+""
+" @setting b:myplugin_enable_thing
+" Enable a thing in the current buffer.
+```
 
 Maktaba flags with doc comments are also automatically recognized:
 
-    ""
-    " Supported things.
-    call s:plugin.Flag('things', ['a', 'b'])
+```viml
+""
+" Supported things.
+call s:plugin.Flag('things', ['a', 'b'])
+```
 
 #### Commands
 
@@ -270,15 +298,17 @@ parse out the arguments in the order that they are mentioned in the comment
 block above the command and will generate a usage line for the command. For
 example, the following comment block:
 
-    ""
-    " Spawns two new zerglings from the given {hatchery}
-    " Attacks all units in the selected [range] upon spawning.
-    " [larva], if given, will be used to spawn the zerglings.
-    " Otherwise a larva will be selected at random.
-    " [!] forces the zerglings to spawn even if you don’t have enough
-    " overlords. Caution: this may make your swarm uncontrollable.
-    command -range -bang -nargs=+ -bar SpawnZerglings
-        \ call zerg#spawn(ZERGLINGS, '<bang>' == '!', <f-args>)
+```viml
+""
+" Spawns two new zerglings from the given {hatchery}
+" Attacks all units in the selected [range] upon spawning.
+" [larva], if given, will be used to spawn the zerglings.
+" Otherwise a larva will be selected at random.
+" [!] forces the zerglings to spawn even if you don’t have enough
+" overlords. Caution: this may make your swarm uncontrollable.
+command -range -bang -nargs=+ -bar SpawnZerglings
+    \ call zerg#spawn(ZERGLINGS, '<bang>' == '!', <f-args>)
+```
 
 will generate the following usage line:
 
@@ -293,10 +323,12 @@ curly brackets stand in for the remainder of the inferred required variables.
 Empty square brackets stand in for the remainder of the inferred optional
 variables. For example:
 
-    ""
-    " @usage {} [first] []
-    " Start with {base}, add [second] to [first] and divide by [third].
-    command SomeCommand ...
+```viml
+""
+" @usage {} [first] []
+" Start with {base}, add [second] to [first] and divide by [third].
+command SomeCommand ...
+```
 
 generates:
 
@@ -312,9 +344,11 @@ expands to all of the inferred required parameters, [] to all of the inferred
 optional parameters, and <> to the complete inferred command name with built-in
 flags included. For example:
 
-    ""
-    " @command <>/{pattern}/{string}/[flags] [count]
-    command -range -bang -nargs=1 Substitute ...
+```viml
+""
+" @command <>/{pattern}/{string}/[flags] [count]
+command -range -bang -nargs=1 Substitute ...
+```
 
 generates the usage line:
 
@@ -328,13 +362,15 @@ more and [arg...] denotes an argument that may appear zero or more times.
 Sometimes you want a command to have more than one usage. For that you may use
 more than one usage directive. Example:
 
-    ""
-    " @usage {list} {index} {item}
-    " Add {item} to {list} at {index}.
-    " @usage {dict} {key} {value}
-    " Set {dict} {key} to {value}.
-    " @all
-    " WARNING: Will launch the nuclear missiles.
+```viml
+""
+" @usage {list} {index} {item}
+" Add {item} to {list} at {index}.
+" @usage {dict} {key} {value}
+" Set {dict} {key} to {value}.
+" @all
+" WARNING: Will launch the nuclear missiles.
+```
 
 This will generate two docs for the command: one for list, one for dicts. An
 @all directive denotes that the remainder of the block will be included in all
