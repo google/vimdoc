@@ -18,6 +18,9 @@ classifiers = [
 ]
 urls = {Repository = "https://github.com/google/vimdoc"}
 dynamic = ["version"]
+dependencies = [
+  "vim-plugin-metadata >= 1.0.0-rc.0",
+]
 
 [project.optional-dependencies]
 completion = ["shtab"]
