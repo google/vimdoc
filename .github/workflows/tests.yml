@@ -29,6 +29,8 @@ jobs:
           - py: "3.5"
             os: macos-12
     env:
+      # Workaround for pypi rejecting older SSL versions from older py versions: 
+      # https://stackoverflow.com/questions/25981703/pip-install-fails-with-connection-error-ssl-certificate-verify-failed-certi
       PIP_TRUSTED_HOST: ${{ matrix.py == '3.5' && 'pypi.python.org pypi.org files.pythonhosted.org' || '' }}
     steps:
       - uses: actions/checkout@v4
