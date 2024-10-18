@@ -183,11 +183,14 @@ class Helpfile(object):
     wrapper = textwrap.TextWrapper(
         width=self.WIDTH,
         initial_indent=(indent * self.TAB),
-        subsequent_indent=((indent + 2) * self.TAB))
+        subsequent_indent=((indent + 2) * self.TAB),
+        break_long_words=False,
+        replace_whitespace=False,
+        break_on_hyphens=False)
     # wrap returns empty list for ''. See http://bugs.python.org/issue15510.
     lines = wrapper.wrap(self.Expand(text, namespace)) or ['']
     for line in lines:
-      self.Print(line)
+      self.Print(line, wide=True)
 
   def Print(self, line, end='\n', wide=False):
     """Outputs a line to the file."""
@@ -213,6 +216,8 @@ class Helpfile(object):
         width=self.WIDTH,
         initial_indent=initial_indent,
         subsequent_indent=subsequent_indent,
+        break_long_words=False,
+        replace_whitespace=False,
         break_on_hyphens=False)
     lines = wrapper.wrap(text)
     # wrap returns empty list for ''. See http://bugs.python.org/issue15510.
@@ -228,7 +233,7 @@ class Helpfile(object):
       assert padding >= 0
       lines[-1] += (fill * padding) + right
     for line in lines:
-      self.Print(line)
+      self.Print(line, wide=True)
 
   def Slug(self, slug, sep='-'):
     return '{}{}{}'.format(self.module.name, sep, slug)
