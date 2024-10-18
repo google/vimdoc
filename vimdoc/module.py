@@ -99,8 +99,11 @@ class Module(object):
       # Sort by namespace, but preserve order within the same namespace. This
       # lets us avoid variability in the order files are traversed without
       # losing all useful order information.
-      collection = sorted(collection,
-          key=lambda x: x.locals.get('namespace', ''))
+      try:
+        collection = sorted(collection,
+            key=lambda x: x.locals.get('namespace', ''))
+      except TypeError as e:
+        print('Module.GetCollection failed sorting collection ->', collection)
     elif typ == vimdoc.DICTIONARY:
       collection = sorted(collection)
     non_default_names = set(x.TagName() for x in collection
