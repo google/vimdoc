@@ -42,6 +42,27 @@ Use setup.py to install vimdoc in the usual way. On most systems, this is:
     python setup.py build
     sudo python setup.py install
 
+Or use `venv` manager
+
+    uv venv
+    uv pip install setuptools
+    uv run setup.py config
+    uv run setup.py build
+    uv run setup.py install
+
+...  And add wrapper script to `PATH` accessible directory;
+
+```bash
+_wrapper="${HOME}/.local/bin/vimdoc";
+
+tee "${_wrapper}" 1>/dev/null <<EOF
+#!/usr/bin/env bash
+uv run "${PWD}/.venv/bin/vimdoc" "\${@}"
+EOF
+
+chmod u+x "${_wrapper}";
+```
+
 Execution
 ---------
 
