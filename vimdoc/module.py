@@ -5,6 +5,8 @@ import json
 import os
 import warnings
 
+import vim_plugin_metadata
+
 import vimdoc
 from vimdoc import error
 from vimdoc import parser
@@ -402,53 +404,34 @@ def Modules(directory):
   # Crawl plugin dir and collect parsed blocks for each file path.
   paths_and_blocks = []
   standalone_paths = []
-  autoloaddir = os.path.join(directory, 'autoload')
-  for (root, dirs, files) in os.walk(directory):
-    # Visit files in a stable order, since the ordering of e.g. the Maktaba
-    # flags below depends upon the order that we visit the files.
-    dirs.sort()
-    files.sort()
-
-    # Prune non-standard top-level dirs like 'test'.
-    if root == directory:
-      dirs[:] = [x for x in dirs if x in DOC_SUBDIRS + ['after']]
-    if root == os.path.join(directory, 'after'):
-      dirs[:] = [x for x in dirs if x in DOC_SUBDIRS]
-    for f in files:
-      filename = os.path.join(root, f)
-      if os.path.splitext(filename)[1] == '.vim':
-        relative_path = os.path.relpath(filename, directory)
-        with io.open(filename, encoding='utf-8') as filehandle:
-          lines = list(filehandle)
-          blocks = list(parser.ParseBlocks(lines, filename))
-          # Define implicit maktaba flags for files that call
-          # maktaba#plugin#Enter. These flags have to be special-cased here
-          # because there aren't necessarily associated doc comment blocks and
-          # the name is computed from the file name.
-          if (not relative_path.startswith('autoload' + os.path.sep)
-              and relative_path != os.path.join('plugin', 'flags.vim')
-              and relative_path != os.path.join('instant', 'flags.vim')):
-            if ContainsMaktabaPluginEnterCall(lines):
-              flagpath = relative_path
-              if flagpath.startswith('after' + os.path.sep):
-                flagpath = os.path.relpath(flagpath, 'after')
-              flagblock = Block(vimdoc.FLAG, is_default=True)
-              name_parts = os.path.splitext(flagpath)[0].split(os.path.sep)
-              flagname = name_parts.pop(0)
-              flagname += ''.join('[' + p + ']' for p in name_parts)
-              flagblock.Local(name=flagname)
-              flagblock.AddLine(
-                  'Configures whether {} should be loaded.'.format(
-                      relative_path))
-              default = 0 if flagname == 'plugin[mappings]' else 1
-              # Use unbulleted list to make sure it's on its own line. Use
-              # backtick to avoid helpfile syntax highlighting.
-              flagblock.AddLine(' - Default: {} `'.format(default))
-              blocks.append(flagblock)
-        paths_and_blocks.append((relative_path, blocks))
-        if filename.startswith(autoloaddir):
-          if blocks and blocks[0].globals.get('standalone'):
-            standalone_paths.append(relative_path)
+  for module, blocks in parser.ParsePluginDir(directory):
+    # Define implicit maktaba flags for files that call
+    # maktaba#plugin#Enter. These flags have to be special-cased here
+    # because there aren't necessarily associated doc comment blocks and
+    # the name is computed from the file name.
+    if (not module.path.parts[0] == 'autoload'
+        and module.path != os.path.join('plugin', 'flags.vim')
+        and module.path != os.path.join('instant', 'flags.vim')):
+      if ContainsMaktabaPluginEnterCall(blocks):
+        flagpath = module.path
+        if flagpath.startswith('after' + os.path.sep):
+          flagpath = os.path.relpath(flagpath, 'after')
+        flagblock = Block(vimdoc.FLAG, is_default=True)
+        name_parts = os.path.splitext(flagpath)[0].split(os.path.sep)
+        flagname = name_parts.pop(0)
+        flagname += ''.join('[' + p + ']' for p in name_parts)
+        flagblock.Local(name=flagname)
+        flagblock.AddLine(
+            'Configures whether {} should be loaded.'.format(
+                module.path))
+        default = 0 if flagname == 'plugin[mappings]' else 1
+        # Use unbulleted list to make sure it's on its own line. Use
+        # backtick to avoid helpfile syntax highlighting.
+        flagblock.AddLine(' - Default: {} `'.format(default))
+        blocks.append(flagblock)
+    paths_and_blocks.append((module.path, blocks))
+    if module.path.parts[0] == 'autoload' and blocks and blocks[0].globals.get('standalone'):
+      standalone_paths.append(module.path)
 
   docdir = os.path.join(directory, 'doc')
   if not os.path.isdir(docdir):
@@ -462,7 +445,7 @@ def Modules(directory):
     if GetMatchingStandalonePath(path, standalone_paths) is not None:
       continue
     namespace = None
-    if path.startswith('autoload' + os.path.sep):
+    if path.parts[0] == 'autoload':
       namespace = GetAutoloadNamespace(os.path.relpath(path, 'autoload'))
     for block in blocks:
       main_module.Merge(block, namespace=namespace)
@@ -506,13 +489,12 @@ def GetMatchingStandalonePath(path, standalones):
   return None
 
 
-def ContainsMaktabaPluginEnterCall(lines):
+def ContainsMaktabaPluginEnterCall(nodes):
   """Returns whether lines of vimscript contain a maktaba#plugin#Enter call.
 
   Args:
-    lines: A sequence of vimscript strings to search.
+    nodes: A sequence of parsed vimscript nodes to search.
   """
-  for _, line in parser.EnumerateStripNewlinesAndJoinContinuations(lines):
-    if not parser.IsComment(line) and 'maktaba#plugin#Enter(' in line:
-      return True
-  return False
+  return any(isinstance(node, vim_plugin_metadata.VimNode.Variable)
+             and 'maktaba#plugin#Enter(' in node.init_value_token
+             for node in nodes)

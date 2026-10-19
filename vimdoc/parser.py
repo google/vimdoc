@@ -1,74 +1,11 @@
 """The vimdoc parser."""
+from vim_plugin_metadata import VimNode, VimParser
+
 from vimdoc import codeline
 from vimdoc import docline
-
 from vimdoc import error
 from vimdoc import regex
-
-
-def IsComment(line):
-  return regex.comment_leader.match(line)
-
-
-def IsContinuation(line):
-  return regex.line_continuation.match(line)
-
-
-def StripContinuator(line):
-  assert regex.line_continuation.match(line)
-  return regex.line_continuation.sub('', line)
-
-
-def EnumerateStripNewlinesAndJoinContinuations(lines):
-  """Preprocesses the lines of a vimscript file.
-
-  Enumerates the lines, strips the newlines from the end, and joins the
-  continuations.
-
-  Args:
-    lines: The lines of the file.
-  Yields:
-    Each preprocessed line.
-  """
-  lineno, cached = (None, None)
-  for i, line in enumerate(lines):
-    line = line.rstrip('\n')
-    if IsContinuation(line):
-      if cached is None:
-        raise error.CannotContinue('No preceding line.', i)
-      elif IsComment(cached) and not IsComment(line):
-        raise error.CannotContinue('No comment to continue.', i)
-      else:
-        cached += StripContinuator(line)
-      continue
-    if cached is not None:
-      yield lineno, cached
-    lineno, cached = (i, line)
-  if cached is not None:
-    yield lineno, cached
-
-
-def EnumerateParsedLines(lines):
-  vimdoc_mode = False
-  for i, line in EnumerateStripNewlinesAndJoinContinuations(lines):
-    if not vimdoc_mode:
-      if regex.vimdoc_leader.match(line):
-        vimdoc_mode = True
-        # There's no need to yield the blank line if it's an empty starter line.
-        # For example, in:
-        # ""
-        # " @usage whatever
-        # " description
-        # There's no need to yield the first docline as a blank.
-        if not regex.empty_vimdoc_leader.match(line):
-          # A starter line starts with two comment leaders.
-          # If we strip one of them it's a normal comment line.
-          yield i, ParseCommentLine(regex.comment_leader.sub('', line))
-    elif IsComment(line):
-      yield i, ParseCommentLine(line)
-    else:
-      vimdoc_mode = False
-      yield i, ParseCodeLine(line)
+from vimdoc.block import Block
 
 
 def ParseCodeLine(line):
@@ -119,17 +56,48 @@ def ParseBlockDirective(name, rest):
   raise error.UnrecognizedBlockDirective(name)
 
 
-def ParseBlocks(lines, filename):
-  blocks = []
+def ParseBlocksForNodeDocComment(doc, blocks, selection):
+  if doc is None:
+    return
+  for line in doc.splitlines():
+    yield from ParseCommentLine(f'" {line}').Affect(blocks, selection)
+
+def AffectForVimNode(node, blocks, selection):
+  if isinstance(node, VimNode.StandaloneDocComment):
+    yield from ParseBlocksForNodeDocComment(node.doc, blocks, selection)
+    yield from codeline.Blank().Affect(blocks, selection)
+    return
+  doc = getattr(node, 'doc', None)
+  yield from ParseBlocksForNodeDocComment(doc, blocks, selection)
+  if isinstance(node, VimNode.Function):
+    yield from ParseCodeLine('func{bang} {name}({args}) {modifiers}'.format(
+        name=node.name,
+        args=', '.join(node.args),
+        bang='!' if '!' in node.modifiers else '',
+        modifiers=' '.join(mod for mod in node.modifiers if mod != '!')
+      )).Affect(blocks, selection)
+  elif isinstance(node, VimNode.Command):
+    yield from ParseCodeLine("command {modifiers} {name}".format(name=node.name, modifiers=' '.join(node.modifiers))).Affect(blocks, selection)
+  elif isinstance(node, VimNode.Variable):
+    yield from ParseCodeLine("let {name} = {rhs}".format(
+      name=node.name,
+      rhs=node.init_value_token,
+    )).Affect(blocks, selection)
+  elif isinstance(node, VimNode.Flag):
+    yield from ParseCodeLine("call s:plugin.Flag('{name}', {default_value_token})".format(name=node.name, default_value_token=node.default_value_token)).Affect(blocks, selection)
+
+def ParsePluginModule(module):
+  unclosed_blocks = []
   selection = []
-  lineno = 0
-  try:
-    for lineno, line in EnumerateParsedLines(lines):
-      for block in line.Affect(blocks, selection):
-        yield block.Close()
-    for block in codeline.EndOfFile().Affect(blocks, selection):
-      yield block.Close()
-  except error.ParseError as e:
-    e.lineno = lineno + 1
-    e.filename = filename
-    raise
+  yield from ParseBlocksForNodeDocComment(module.doc, unclosed_blocks, selection)
+  yield from codeline.Blank().Affect(unclosed_blocks, selection)
+
+  for node in module.nodes:
+    yield from AffectForVimNode(node, unclosed_blocks, selection)
+  yield from codeline.EndOfFile().Affect(unclosed_blocks, selection)
+
+def ParsePluginDir(directory):
+  vim_parser = VimParser()
+  for module in vim_parser.parse_plugin_dir(directory).content:
+    module_blocks = [block.Close() for block in ParsePluginModule(module)]
+    yield (module, module_blocks)
