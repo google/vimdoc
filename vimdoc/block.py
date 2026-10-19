@@ -254,7 +254,10 @@ class Block(object):
         return '{}.{}'.format(self.locals['dict'], attribute)
       if 'exception' in self.locals:
         return 'ERROR({})'.format(self.locals['exception'] or self.LocalName())
-      return self.locals.get('namespace', '') + self.LocalName()
+      if self.locals.get('namespace', '') is None:
+        print("Warning: skipping None returned by -> `self.locals.get('namespace', '')` for ->", self.LocalName())
+      else:
+        return self.locals.get('namespace', '') + self.LocalName()
     return self.LocalName()
 
   def TagName(self):
