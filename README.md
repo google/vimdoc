@@ -54,6 +54,27 @@ vimdoc directory, and run
 pip install .[completion]
 ```
 
+Or use `venv` manager
+
+    uv venv
+    uv pip install setuptools
+    uv run setup.py config
+    uv run setup.py build
+    uv run setup.py install
+
+...  And add wrapper script to `PATH` accessible directory;
+
+```bash
+_wrapper="${HOME}/.local/bin/vimdoc";
+
+tee "${_wrapper}" 1>/dev/null <<EOF
+#!/usr/bin/env bash
+uv run "${PWD}/.venv/bin/vimdoc" "\${@}"
+EOF
+
+chmod u+x "${_wrapper}";
+```
+
 Execution
 ---------
 
