@@ -261,7 +261,8 @@ class Module(object):
       'dicts',
       'functions',
       'exceptions',
-      'mappings']
+      'mappings',
+      'license']
     # Add any undeclared sections before custom sections, except 'about' which
     # comes at the end by default.
     section_insertion_idx = 0
