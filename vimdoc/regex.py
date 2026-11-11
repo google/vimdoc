@@ -378,6 +378,26 @@ bad_separator = re.compile(r"""
   )
 """, re.VERBOSE)
 
-function_arg = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*|\.\.\.)')
+function_arg = re.compile(r"""
+  # Match inputs like `bar = g:bar` or `wat = "woot"` or `foo = 41968`
+  (
+    (?P<key>[a-zA-Z_][a-zA-Z0-9_]*)
+    (\s*\=\s*)
+    # Could be within double or single quotes, or bare reference to a variable
+    (?P<value>
+        ("[a-zA-Z0-9_:\.]*")
+      | ('[a-zA-Z0-9_:\.]*')
+      | ([a-zA-Z0-9_:\.]*)
+    )
+  )
+  |
+  # Match inputs like `oWoo_Hu` and `...`
+  (?P<label>
+    # Any word that starts with letters, may end with numbers, or contain underscore
+    [a-zA-Z_][a-zA-Z0-9_]*
+    # Or literal three periods
+    |\.\.\.
+  )
+""", re.VERBOSE)
 
 list_item = re.compile(r'^\s*([*+-]|\d+\.)\s+')

@@ -4,6 +4,7 @@ from vimdoc import docline
 
 from vimdoc import error
 from vimdoc import regex
+import re
 
 
 def IsComment(line):
@@ -78,7 +79,16 @@ def ParseCodeLine(line):
   fmatch = regex.function_line.match(line)
   if fmatch:
     namespace, name, args = fmatch.groups()
-    return codeline.Function(name, namespace, regex.function_arg.findall(args))
+    # https://stackoverflow.com/a/25471762
+    args_list = re.split(r',\s*(?=(?:"[^"]*?(?: [^"]*)*))|,\s*(?=[^",]+(?:,|$))', args)
+    args_groupdicts = [regex.function_arg.match(x).groupdict() for x in args_list]
+    args_names = []
+    for groupdict in args_groupdicts:
+      if groupdict.get('key') is not None and groupdict.get('value') is not None:
+        args_names.append(groupdict.get('key'))
+      elif groupdict.get('label') is not None:
+        args_names.append(groupdict.get('label'))
+    return codeline.Function(name, namespace, args_names)
   cmatch = regex.command_line.match(line)
   if cmatch:
     args, name = cmatch.groups()
