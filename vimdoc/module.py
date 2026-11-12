@@ -321,7 +321,9 @@ class VimPlugin(object):
     block = None
     if typ in self.collections:
       collection = self.collections[typ]
-      candidates = [x for x in collection if x.FullName() == fullname]
+      # Secondary usage blocks describe the same definition and have no tag.
+      candidates = [x for x in collection
+                    if x.FullName() == fullname and x.TagName() is not None]
       if len(candidates) > 1:
         raise KeyError('Found multiple %ss named %s' % (typ, name))
       if candidates:
