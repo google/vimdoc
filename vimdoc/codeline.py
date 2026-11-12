@@ -136,7 +136,7 @@ class Flag(Definition):
 
   def Affect(self, blocks, selection):
     # Add line to show expression for default value. Can be None if vimdoc
-    # failed to parse a default, e.g. due to deeply-nested parentheses.
+    # failed to parse a complete default expression.
     if self._default is not None:
       # Append to last block, creating one if there isn't one yet.
       if not blocks:
