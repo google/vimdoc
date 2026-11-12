@@ -97,9 +97,40 @@ def ParseCodeLine(line):
     return codeline.Setting('g:' + name)
   flagmatch = regex.flag_line.match(line)
   if flagmatch:
-    a, b, default = flagmatch.groups()
+    a, b, unused_default = flagmatch.groups()
+    name_end = flagmatch.end(1) if a is not None else flagmatch.end(2)
+    default_start = line.index(',', name_end + 1) + 1
+    default = ParseFlagDefault(line, default_start)
     return codeline.Flag(a or b, default)
   return codeline.Unrecognized(line)
+
+
+def ParseFlagDefault(line, start):
+  """Reads a default expression up to the flag call's closing parenthesis."""
+  depth = 0
+  quote = None
+  i = start
+  while i < len(line):
+    char = line[i]
+    if quote is not None:
+      if char == quote:
+        if quote == "'" and line[i:i + 2] == "''":
+          i += 2
+          continue
+        quote = None
+      elif quote == '"' and char == '\\':
+        i += 2
+        continue
+    elif char in "'\"":
+      quote = char
+    elif char == '(':
+      depth += 1
+    elif char == ')':
+      if depth == 0:
+        return line[start:i].strip() or None
+      depth -= 1
+    i += 1
+  return None
 
 
 def ParseCommentLine(line):
