@@ -294,9 +294,12 @@ class Header(BlockDirective):
       # to subsequent blocks showing other ways to use the same function.)
       is_secondary = len(blocks) > 0
       newblock = Block(is_secondary=is_secondary)
-      # If the first block has no header, copy its locals.
-      if blocks and blocks[0].header is None:
-        newblock.locals = dict(blocks[0].locals)
+      # Metadata before the first header applies to every usage, while
+      # directives after a header apply only to that usage.
+      if blocks:
+        first = blocks[0]
+        defaults = first.locals if first.header is None else first.header_defaults
+        newblock.locals = dict(defaults)
       blocks.append(newblock)
       selection[:] = [len(blocks) - 1]
     else:
