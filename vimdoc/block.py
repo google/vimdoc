@@ -49,6 +49,7 @@ class Block(object):
     # tagline (string)
     self.globals = {}
     self.header = None
+    self.header_defaults = {}
     self.paragraphs = paragraph.Paragraphs()
     self._required_args = []
     self._optional_args = []
@@ -150,6 +151,7 @@ class Block(object):
     """Sets the header handler."""
     if self.header:
       raise error.MultipleErrors
+    self.header_defaults = dict(self.locals)
     self.header = directive
     self.paragraphs.Close()
 
