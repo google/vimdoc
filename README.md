@@ -155,6 +155,8 @@ Available block directives include:
 - `@setting name` declares a setting (global or per-buffer configuration
   variable).
 - `@default arg=value` describes the default value of an optional arg.
+- `@tag name` renders an arbitrary help tag at that position in the block.
+  The name is used literally, without a plugin-name prefix.
 - `@throws exception` describes the type of exceptions that a function or
   command may throw.
 - `@deprecated reason` marks a command or function as deprecated and excludes it
@@ -173,6 +175,7 @@ enclosed in parenthesis.
 - `@flag(name)` generates a link to a flag defined in the plugin.
 - `@setting(name)` generates a link to a setting defined in the plugin.
 - `@section(id)` generates a link to a section defined in the plugin.
+- `@tag(name)` renders an arbitrary help tag inline in prose.
 - `@dict(name)` generates a link to a dictionary defined in the plugin.
 - `@plugin(attr)` Outputs some plugin data, such as the name or author. `attr`
   must be one of `stylized`, `name`, or `author`. If the attr (and parenthesis)

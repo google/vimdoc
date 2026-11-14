@@ -167,6 +167,10 @@ class Block(object):
       self._optional_args.append(arg)
     self.paragraphs.SetType(paragraph.DefaultLine, arg, value)
 
+  def AddTag(self, tag):
+    """Adds an arbitrary help tag at the current position in the block."""
+    self.paragraphs.SetType(paragraph.TagLine, tag)
+
   def Except(self, typ, description):
     """Adds a line specifying that the code can throw a specific exception."""
     description = description or ''
