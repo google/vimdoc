@@ -163,6 +163,16 @@ Available block directives include:
 The global directives (@stylized, @order, and @library) are all detected from
 inside a @section block (usually the Introduction section).
 
+Long `@throws`, `@order`, and `@tagline` directives can continue on comment
+lines with four spaces of indentation after the usual comment leader:
+
+```viml
+" @throws Ambiguous if {name} refers to multiple sources within one
+"     namespace.
+```
+
+An unindented comment starts a separate documentation line.
+
 ### Inline Directives
 
 Inline directives occur in the body of comment blocks. Most take one argument
