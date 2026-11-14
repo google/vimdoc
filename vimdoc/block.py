@@ -195,6 +195,13 @@ class Block(object):
         from vimdoc.docline import Usage
         self.header = Usage('{]')
       self.locals['usage'] = self.header.GenerateUsage(self)
+      if (self.locals.get('type') == vimdoc.COMMAND
+          and self.locals.get('nargs') == '0'
+          and (regex.required_arg.search(self.locals['usage'])
+               or regex.optional_arg.search(self.locals['usage']))):
+        warnings.warn('Documentation declares arguments for command {} '
+                      'which accepts no arguments.'.format(self.FullName()),
+                      error.ArgumentMismatch)
     if 'private' in self.locals and self.locals.get('type') != vimdoc.FUNCTION:
       raise error.InvalidBlock('Only functions may be marked as private.')
     return self
