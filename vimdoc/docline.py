@@ -269,6 +269,16 @@ class Throws(BlockDirective):
     block.Except(self.error, self.description)
 
 
+class Tag(BlockDirective):
+  REGEX = regex.stylizing_args
+
+  def Assign(self, tag):
+    self.tag = tag
+
+  def Update(self, block):
+    block.AddTag(self.tag)
+
+
 class Header(BlockDirective):
   """A header directive, like @usage @function or @command."""
 
@@ -407,6 +417,7 @@ BLOCK_DIRECTIVES = {
     'stylized': Stylized,
     'subsection': SubSection,
     'tagline': Tagline,
+    'tag': Tag,
     'throws': Throws,
     'usage': Usage,
 }

@@ -66,6 +66,13 @@ class DefaultLine(Paragraph):
     self.value = value
 
 
+class TagLine(Paragraph):
+  def __init__(self, tag):
+    super(TagLine, self).__init__()
+    self.open = False
+    self.tag = tag
+
+
 class ListItem(TextParagraph):
   def __init__(self, leader='*', level=0):
     super(ListItem, self).__init__()

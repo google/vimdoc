@@ -170,6 +170,8 @@ class Helpfile(object):
     elif isinstance(p, paragraph.DefaultLine):
       self.WriteLine(self.Default(
           p.arg, p.value, namespace), indent=indent)
+    elif isinstance(p, paragraph.TagLine):
+      self.Print(self.Tag(p.tag).rjust(self.WIDTH), wide=True)
     elif isinstance(p, paragraph.ExceptionLine):
       self.WriteLine(self.Throws(
           p.exception, p.description, namespace), indent=indent)
@@ -256,7 +258,9 @@ class Helpfile(object):
 
   def ExpandInline(self, inline, element, namespace):
     """Expands inline directives, like @function()."""
-    if inline == 'section':
+    if inline == 'tag':
+      return None if element is None else self.Tag(element)
+    elif inline == 'section':
       return self.Link(self.Slug(element))
     elif inline == 'function':
       # If a user says @function(#Foo) then that points to in#this#file#Foo.
