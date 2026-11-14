@@ -357,7 +357,7 @@ flag_line = re.compile(r"""
     \s*\)
   )?
 """, re.VERBOSE)
-inline_directive = re.compile(r'@([a-zA-Z_][a-zA-Z0-9_]*)(?:\(([^\s)]+)\))?')
+inline_directive = re.compile(r'@([a-zA-Z_][a-zA-Z0-9_]*)(?:\(((?:[^\s()]|\(\))+)\))?')
 
 name_hole = re.compile(r'<>')
 arg_hole = re.compile(r'{\]')
