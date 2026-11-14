@@ -33,6 +33,9 @@ def EnumerateStripNewlinesAndJoinContinuations(lines):
   lineno, cached = (None, None)
   for i, line in enumerate(lines):
     line = line.rstrip('\n')
+    # Vim continuation comments do not terminate the preceding logical line.
+    if line.lstrip().startswith('"\\'):
+      continue
     if IsContinuation(line):
       if cached is None:
         raise error.CannotContinue('No preceding line.', i)
