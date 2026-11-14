@@ -180,14 +180,8 @@ class Helpfile(object):
 
   def WriteCodeLine(self, text, namespace, indent=0):
     """Writes one line of code."""
-    wrapper = textwrap.TextWrapper(
-        width=self.WIDTH,
-        initial_indent=(indent * self.TAB),
-        subsequent_indent=((indent + 2) * self.TAB))
-    # wrap returns empty list for ''. See http://bugs.python.org/issue15510.
-    lines = wrapper.wrap(self.Expand(text, namespace)) or ['']
-    for line in lines:
-      self.Print(line)
+    text = self.Expand(text, namespace)
+    self.Print((indent * self.TAB) + text if text else '', wide=True)
 
   def Print(self, line, end='\n', wide=False):
     """Outputs a line to the file."""
