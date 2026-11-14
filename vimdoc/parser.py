@@ -90,6 +90,8 @@ def ParseCodeLine(line):
         'buffer': '-buffer' in args,
         'bar': '-bar' in args,
     }
+    flags['nargs'] = next((flag.split('=', 1)[1] for flag in args.split()
+                           if flag.startswith('-nargs=')), '0')
     return codeline.Command(name, **flags)
   smatch = regex.setting_line.match(line)
   if smatch:

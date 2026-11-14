@@ -314,6 +314,9 @@ will generate the following usage line:
 
     :[range]SpawnZerglings[!] {hatchery} [larva]
 
+Vimdoc warns if documented arguments are declared for a command
+that accepts none (`-nargs=0`, including the default when omitted).
+
 You can override the usage line with the @usage command, which takes a list of
 arguments. Any arguments that look like vim variable names (\I\i+) will be
 assumed to be parameters, and their required-ness will be inferred from the

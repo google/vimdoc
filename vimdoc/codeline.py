@@ -121,7 +121,7 @@ class Command(Definition):
     head += '<>'
     if self.flags.get('bang'):
       head += '[!]'
-    block.Local(head=head)
+    block.Local(head=head, nargs=self.flags.get('nargs', '0'))
 
 
 class Setting(Definition):
