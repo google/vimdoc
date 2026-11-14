@@ -169,6 +169,7 @@ Inline directives occur in the body of comment blocks. Most take one argument
 enclosed in parenthesis.
 
 - `@function(name)` generates a link to a function defined in the plugin.
+  The equivalent spelling `@function(name())` is also accepted.
 - `@command(name)` generates a link to a command defined in the plugin.
 - `@flag(name)` generates a link to a flag defined in the plugin.
 - `@setting(name)` generates a link to a setting defined in the plugin.

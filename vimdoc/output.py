@@ -259,6 +259,8 @@ class Helpfile(object):
     if inline == 'section':
       return self.Link(self.Slug(element))
     elif inline == 'function':
+      if element.endswith('()'):
+        element = element[:-2]
       # If a user says @function(#Foo) then that points to in#this#file#Foo.
       if element.startswith('#'):
         element = (namespace or '') + element[1:]
