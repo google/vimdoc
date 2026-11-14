@@ -2,6 +2,7 @@ import unittest
 
 from vimdoc import paragraph
 from vimdoc import parser
+from vimdoc import docline
 
 
 class TestDirectiveContinuations(unittest.TestCase):
@@ -38,3 +39,17 @@ class TestDirectiveContinuations(unittest.TestCase):
         ['""', '" @usage {name}', '"     Indented description.']))
     self.assertEqual(2, len(parsed))
     self.assertEqual('    Indented description.', parsed[1][1].line)
+
+  def test_indented_block_directives_remain_separate(self):
+    cases = [
+        ('@tagline First', '@section Introduction', docline.Section),
+        ('@throws Example first', '@default value=0', docline.Default),
+        ('@order intro', '@section Introduction', docline.Section),
+    ]
+    for first, second, expected_type in cases:
+      with self.subTest(first=first, second=second):
+        parsed = list(parser.EnumerateParsedLines(
+            ['""', '" ' + first, '"     ' + second]))
+        self.assertEqual(2, len(parsed))
+        self.assertIsInstance(parsed[1][1], expected_type)
+        self.assertEqual(2, parsed[1][0])

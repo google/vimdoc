@@ -55,7 +55,8 @@ def EnumerateJoinedDirectiveLines(lines):
     directive = regex.block_directive.match(pending[1]) if pending else None
     body = regex.comment_leader.sub('', line) if IsComment(line) else None
     if (directive and directive.group(1) in ('throws', 'tagline', 'order')
-        and body and body.startswith('    ') and body.strip()):
+        and body and body.startswith('    ') and body.strip()
+        and not regex.block_directive.match(line)):
       pending = (pending[0], pending[1] + ' ' + body.lstrip())
     else:
       if pending is not None:
