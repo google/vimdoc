@@ -331,7 +331,7 @@ setting_line = re.compile(r"""
 setting_scope = re.compile(r'[a-z]:')
 flag_line = re.compile(r"""
   # Definition start.
-  ^\s*call?\s*.*\.Flag\(
+  ^\s*call?\s*.*\.Flag\(\s*
   # Shit's about to get real.
   (?:
     # GROUP 1: The flag name in single quotes.
