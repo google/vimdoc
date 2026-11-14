@@ -98,6 +98,11 @@ class Block(object):
         return
     elif self.paragraphs.IsType(paragraph.ListItem):
       self.paragraphs.Close()
+    # Consecutive examples need no empty text paragraph between code blocks.
+    if (line == '>' and self.paragraphs
+        and isinstance(self.paragraphs[-1], paragraph.CodeBlock)):
+      self.paragraphs.SetType(paragraph.CodeBlock)
+      return
     # Everything else is text.
     self.paragraphs.SetType(paragraph.TextParagraph)
     # Lines ending in '>' enter code blocks. Must have a space before if it if

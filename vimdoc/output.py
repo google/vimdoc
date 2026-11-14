@@ -138,8 +138,17 @@ class Helpfile(object):
   def WriteParagraphs(self, block, indent=0):
     """Writes a series of text with optional indents."""
     assert 'namespace' in block.locals
-    for p in block.paragraphs:
-      self.WriteParagraph(p, block.locals['namespace'], indent=indent)
+    for index, p in enumerate(block.paragraphs):
+      if isinstance(p, paragraph.CodeBlock):
+        previous_code = index > 0 and isinstance(
+            block.paragraphs[index - 1], paragraph.CodeBlock)
+        next_code = index + 1 < len(block.paragraphs) and isinstance(
+            block.paragraphs[index + 1], paragraph.CodeBlock)
+        self.WriteCodeBlock(p, block.locals['namespace'], indent=indent,
+                            opening='< >' if previous_code else '>',
+                            closing=not next_code)
+      else:
+        self.WriteParagraph(p, block.locals['namespace'], indent=indent)
     self.WriteLine()
 
   def WriteParagraph(self, p, namespace, indent=0):
@@ -163,10 +172,7 @@ class Helpfile(object):
     elif isinstance(p, paragraph.BlankLine):
       self.WriteLine()
     elif isinstance(p, paragraph.CodeBlock):
-      self.WriteLine('>')
-      for line in p.lines:
-        self.WriteCodeLine(line, namespace, indent=indent)
-      self.WriteLine('<')
+      self.WriteCodeBlock(p, namespace, indent=indent)
     elif isinstance(p, paragraph.DefaultLine):
       self.WriteLine(self.Default(
           p.arg, p.value, namespace), indent=indent)
@@ -177,6 +183,13 @@ class Helpfile(object):
       self.WriteLine(p.name.upper(), indent=indent)
     else:
       raise ValueError('What kind of paragraph is {}?'.format(p))
+
+  def WriteCodeBlock(self, block, namespace, indent=0, opening='>', closing=True):
+    self.WriteLine(opening)
+    for line in block.lines:
+      self.WriteCodeLine(line, namespace, indent=indent)
+    if closing:
+      self.WriteLine('<')
 
   def WriteCodeLine(self, text, namespace, indent=0):
     """Writes one line of code."""
